@@ -17,9 +17,9 @@ part 'example.g.dart';
 class AppConfig {
   final String apiUrl;
   final String apiKey;
-  
+
   AppConfig({required this.apiUrl, required this.apiKey});
-  
+
   void printConfig() {
     print('AppConfig: API URL=$apiUrl, API Key=$apiKey');
   }
@@ -28,9 +28,9 @@ class AppConfig {
 @RegisterLazySingleton()
 class HttpClient {
   final AppConfig _config;
-  
+
   HttpClient(this._config);
-  
+
   Future<String> get(String url) async {
     print('HttpClient: Making GET request to $url');
     return 'Response from $url';

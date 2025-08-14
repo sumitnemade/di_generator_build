@@ -116,15 +116,14 @@ $className $methodName(${constructorInfo.parameterSignature}) {
     for (final ElementAnnotation metadata in element.metadata) {
       final Element? annotationElement = metadata.element;
       if (annotationElement != null) {
-        final String? annotationName = annotationElement.name;
-        if (annotationName != null &&
-            _isDependencyInjectionAnnotation(annotationName, null)) {
+        final String annotationName = annotationElement.displayName;
+        if (_isDependencyInjectionAnnotation(annotationName, null)) {
           return annotationName;
         }
       }
     }
     // Fallback to factory if we can't determine the annotation
-    return 'Factory';
+    return 'RegisterFactory';
   }
 
   /// Get registration type from annotation name
@@ -183,7 +182,7 @@ $className $methodName(${constructorInfo.parameterSignature}) {
           // Remove underscore from parameter name for named parameters
           final String paramName =
               param.name.startsWith('_') ? param.name.substring(1) : param.name;
-          paramSignatures.add('${param.type} $paramName');
+          paramSignatures.add('required ${param.type} $paramName');
           constructorCalls.add(paramName);
         } else {
           // For optional parameters, add to method signature with default value
@@ -202,7 +201,13 @@ $className $methodName(${constructorInfo.parameterSignature}) {
             final String paramName = param.name.startsWith('_')
                 ? param.name.substring(1)
                 : param.name;
-            paramSignatures.add('${param.type} $paramName = $defaultValue');
+
+            // If defaultValue is empty, don't add a default value (for nullable types)
+            if (defaultValue.isEmpty) {
+              paramSignatures.add('${param.type} $paramName');
+            } else {
+              paramSignatures.add('${param.type} $paramName = $defaultValue');
+            }
             constructorCalls.add(paramName);
           }
         }
@@ -226,9 +231,6 @@ $className $methodName(${constructorInfo.parameterSignature}) {
       'int',
       'double',
       'bool',
-      'List',
-      'Map',
-      'Set',
       'num',
       'Object',
       'dynamic',
@@ -236,11 +238,27 @@ $className $methodName(${constructorInfo.parameterSignature}) {
       'Null'
     ];
 
-    // Check if it contains any primitive type
+    // Handle nullable types - they should be treated as parameters, not class dependencies
+    if (type.endsWith('?')) {
+      return false;
+    }
+
+    // Handle generic types like List<String>, Map<String, String>
+    if (type.contains('<')) {
+      // Generic types should be treated as parameters, not class dependencies
+      return false;
+    }
+
+    // Check if it's a simple primitive type
     for (final String primitive in primitiveTypes) {
-      if (type.contains(primitive) && !type.contains('<')) {
+      if (type == primitive) {
         return false;
       }
+    }
+
+    // Check for List, Map, Set without generics (which are rare but possible)
+    if (type == 'List' || type == 'Map' || type == 'Set') {
+      return false;
     }
 
     return true;
@@ -257,6 +275,11 @@ $className $methodName(${constructorInfo.parameterSignature}) {
 
   /// Get default value for primitive types
   String _getDefaultValueForType(String type) {
+    // Handle nullable types - no default value needed as they default to null
+    if (type.endsWith('?')) {
+      return ''; // Empty string means no default value
+    }
+
     if (type.contains('String')) {
       return "'default-value'";
     }
@@ -362,7 +385,8 @@ class SourceDirectoryBuilder extends Builder {
         if (annotationElement != null) {
           // Check if this is a dependency injection annotation by checking the type
           final String? annotationType = annotationElement.library?.name;
-          final String? annotationName = annotationElement.displayName; // Use displayName instead of name
+          final String annotationName =
+              annotationElement.displayName; // Use displayName instead of name
 
           // Check if it's a dependency injection annotation from our package
           if (_isDependencyInjectionAnnotation(

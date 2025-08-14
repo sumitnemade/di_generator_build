@@ -112,6 +112,7 @@ analyzer:
     - "test_build/**"
     - "build/**"
     - ".dart_tool/**"
+    - "example/**"
     - "example/**/*.g.dart"
   
   # Enable all error rules

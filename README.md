@@ -166,17 +166,6 @@ Separate dependency creation from business logic, making your code more testable
 ### Automatic Dependency Resolution
 Dependencies are automatically injected based on constructor parameters, reducing boilerplate code.
 
-## 🔧 Configuration
-
-Add to your `build.yaml`:
-
-```yaml
-targets:
-  $default:
-    builders:
-      di_generator_build|di_generator:
-        enabled: true
-```
 
 ## 📝 Examples
 
@@ -274,15 +263,9 @@ void main() {
 ## 📦 Installation
 
 ```bash
-dart pub add di_generator_build --dev
+dart pub add di_generator_build
 dart pub add build_runner --dev
 ```
-
-## 🔗 Dependencies
-
-- [get_it](https://pub.dev/packages/get_it): Service locator for dependency injection
-- [build_runner](https://pub.dev/packages/build_runner): Code generation framework
-- [source_gen](https://pub.dev/packages/source_gen): Source code generation utilities
 
 ## 🤝 Contributing
 
@@ -304,6 +287,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Built on top of the excellent [GetIt](https://pub.dev/packages/get_it) package
 - Uses [build_runner](https://pub.dev/packages/build_runner) for code generation
+- [source_gen](https://pub.dev/packages/source_gen): Source code generation utilities
 
 ## 📞 Support
 

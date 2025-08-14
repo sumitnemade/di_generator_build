@@ -50,22 +50,52 @@ extension GetItExtension on GetIt {
           break;
         default:
           throw UnimplementedError('RegisterAs.$registerAs is not implemented');
-        // case RegisterAs.factoryAsync:
-        //   // Async factory registration
-        //   registerFactoryAsync<T>(() async => instanceCreator());
-        //   break;
-        // case RegisterAs.lazySingletonAsync:
-        //   // Async lazy singleton registration
-        //   registerLazySingletonAsync<T>(() async => instanceCreator());
-        //   break;
-        // case RegisterAs.singletonAsync:
-        //   // Async singleton registration
-        //   registerSingletonAsync<T>(() async => instanceCreator());
-        //   break;
       }
     }
 
     return get<T>();
+  }
+
+  /// Gets or registers an async dependency with optimized lazy loading.
+  ///
+  /// This method checks if a dependency is already registered and either returns
+  /// the existing instance or registers a new one based on the specified type.
+  ///
+  /// [instanceCreator] - Async function that creates the instance
+  /// [registerAs] - Type of registration (factoryAsync, lazySingletonAsync, singletonAsync)
+  ///
+  /// Returns a Future with the dependency instance.
+  Future<T> getOrRegisterAsync<T extends Object>(
+    Future<T> Function() instanceCreator,
+    RegisterAs registerAs,
+  ) async {
+    // Optimized: Check registration once and handle accordingly
+    if (!isRegistered<T>()) {
+      switch (registerAs) {
+        case RegisterAs.factoryAsync:
+          // Optimized: Direct async function registration
+          registerFactoryAsync<T>(instanceCreator);
+          break;
+        case RegisterAs.lazySingletonAsync:
+          // Optimized: Direct async lazy singleton registration
+          registerLazySingletonAsync<T>(instanceCreator);
+          break;
+        case RegisterAs.singletonAsync:
+          // Optimized: Create async instance once and register
+          final T instance = await instanceCreator();
+          registerSingleton<T>(instance);
+          break;
+        default:
+          throw UnimplementedError('RegisterAs.$registerAs is not implemented for async operations');
+      }
+    }
+
+    // For singletonAsync, we registered it as a regular singleton, so use get instead of getAsync
+    if (registerAs == RegisterAs.singletonAsync) {
+      return get<T>();
+    }
+    
+    return getAsync<T>();
   }
 
   /// Optimized method for factory registration (most common use case).
@@ -90,38 +120,23 @@ extension GetItExtension on GetIt {
   /// Optimized method for async factory registration.
   ///
   /// Creates a new async instance each time the dependency is requested.
-// Future<T> getOrRegisterFactoryAsync<T extends Object>(
-//     Future<T> Function() instanceCreator) {
-//   if (!isRegistered<T>()) {
-//     registerFactoryAsync<T>(instanceCreator);
-//   }
-//
-//   return getAsync<T>();
-// }
+  Future<T> getOrRegisterFactoryAsync<T extends Object>(
+      Future<T> Function() instanceCreator) =>
+      getOrRegisterAsync<T>(instanceCreator, RegisterAs.factoryAsync);
 
   /// Optimized method for async lazy singleton registration.
   ///
   /// Creates the async instance on first use, then reuses it for subsequent requests.
-// Future<T> getOrRegisterLazySingletonAsync<T extends Object>(
-//     Future<T> Function() instanceCreator) {
-//   if (!isRegistered<T>()) {
-//     registerLazySingletonAsync<T>(instanceCreator);
-//   }
-//
-//   return getAsync<T>();
-// }
-//
-// /// Optimized method for async singleton registration.
-// ///
-// /// Creates the async instance immediately and reuses it for all subsequent requests.
-// Future<T> getOrRegisterSingletonAsync<T extends Object>(
-//     Future<T> Function() instanceCreator) {
-//   if (!isRegistered<T>()) {
-//     registerSingletonAsync<T>(instanceCreator);
-//   }
-//
-//   return getAsync<T>();
-// }
+  Future<T> getOrRegisterLazySingletonAsync<T extends Object>(
+      Future<T> Function() instanceCreator) =>
+      getOrRegisterAsync<T>(instanceCreator, RegisterAs.lazySingletonAsync);
+
+  /// Optimized method for async singleton registration.
+  ///
+  /// Creates the async instance immediately and reuses it for all subsequent requests.
+  Future<T> getOrRegisterSingletonAsync<T extends Object>(
+      Future<T> Function() instanceCreator) =>
+      getOrRegisterAsync<T>(instanceCreator, RegisterAs.singletonAsync);
 }
 
 /// Enum to specify the type of dependency registration.

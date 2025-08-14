@@ -7,21 +7,31 @@ import 'package:source_gen/source_gen.dart';
 
 import 'annotations.dart';
 
-/// Generator that creates dependency injection methods for classes annotated with [AutoRegister].
+/// Generator that creates dependency injection methods for classes annotated with dependency injection annotations.
 ///
-/// This generator automatically analyzes classes with the [AutoRegister] annotation and
-/// generates appropriate dependency injection methods that integrate with GetIt.
+/// This generator automatically analyzes classes with annotations like @Factory, @Singleton, @LazySingleton, etc.
+/// and generates appropriate dependency injection methods that integrate with GetIt.
+///
+/// ## Supported Annotations
+///
+/// - [Factory]: Creates new instance each time
+/// - [Singleton]: Creates instance immediately and reuses it
+/// - [LazySingleton]: Creates instance on first use, then reuses it
+/// - [LazyFactory]: Alias for LazySingleton
+/// - [AsyncFactory]: Creates new async instance each time
+/// - [AsyncSingleton]: Creates async instance immediately and reuses it
+/// - [AsyncLazySingleton]: Creates async instance on first use, then reuses it
 ///
 /// ## Generated Output
 ///
 /// For a class like:
 /// ```dart
-/// @AutoRegister(registrationType: RegisterAs.singleton)
+/// @Singleton()
 /// class MyService {
 ///   final Repository _repository;
 ///   final String _apiKey;
 ///
-///   MyService(this._repository, [this._apiKey = 'default-key']);
+/// MyService(this._repository, [this._apiKey = 'default-key']);
 /// }
 /// ```
 ///
@@ -32,7 +42,30 @@ import 'annotations.dart';
 ///       () => MyService(getRepository(), apiKey), RegisterAs.singleton);
 /// }
 /// ```
-class AutoRegisterGenerator extends GeneratorForAnnotation<AutoRegister> {
+///
+/// For async classes:
+/// ```dart
+/// @AsyncFactory()
+/// class MyService {
+///   final Repository _repository;
+///   final String _apiKey;
+///
+/// MyService(this._repository, [this._apiKey = 'default-key']);
+///
+///   Future<void> doSomething() async {
+///     // Your async service logic
+///   }
+/// }
+/// ```
+///
+/// It generates:
+/// ```dart
+/// Future<MyService> getMyService({String apiKey = 'default-key'}) async {
+///   return await GetIt.instance.getOrRegisterAsync<MyService>(
+///       () async => MyService(getRepository(), apiKey), RegisterAs.factoryAsync);
+/// }
+/// ```
+class DependencyInjectionGenerator extends GeneratorForAnnotation<Object> {
   @override
   String generateForAnnotatedElement(
     Element element,
@@ -41,36 +74,81 @@ class AutoRegisterGenerator extends GeneratorForAnnotation<AutoRegister> {
   ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
-        'AutoRegister annotation can only be applied to classes',
+        'Dependency injection annotations can only be applied to classes',
         element: element,
       );
     }
 
     final String className = element.name;
+    
+    // Get the annotation type from the element's metadata
+    final String annotationName = _getAnnotationName(element, annotation);
 
     // Get registration type from annotation
-    RegisterAs registrationType;
-    try {
-      final DartObject registrationTypeValue =
-          annotation.read('registrationType').objectValue;
-      registrationType = _getRegistrationTypeFromObject(registrationTypeValue);
-    } on Exception {
-      registrationType = RegisterAs.factory;
-    }
+    final RegisterAs registrationType = _getRegistrationTypeFromAnnotation(annotationName);
+    final bool isAsync = _isAsyncAnnotation(annotationName);
 
     // Auto-detect constructor parameters
     final _ConstructorInfo constructorInfo = _getConstructorInfo(element);
     final String methodName = 'get$className';
-    final String registrationTypeEnum =
-        _getRegistrationTypeEnum(registrationType);
+    final String registrationTypeEnum = _getRegistrationTypeEnum(registrationType);
 
-    return '''
+    if (isAsync) {
+      return '''
+Future<$className> $methodName(${constructorInfo.parameterSignature}) async {
+  return await GetIt.instance.getOrRegisterAsync<$className>(
+      () async => $className(${constructorInfo.constructorCall}), $registrationTypeEnum);
+}
+''';
+    } else {
+      return '''
 $className $methodName(${constructorInfo.parameterSignature}) {
   return GetIt.instance.getOrRegister<$className>(
       () => $className(${constructorInfo.constructorCall}), $registrationTypeEnum);
 }
 ''';
+    }
   }
+
+  /// Get the annotation name from the element's metadata
+  String _getAnnotationName(ClassElement element, ConstantReader annotation) {
+    // Look for our annotations in the element's metadata
+    for (final ElementAnnotation metadata in element.metadata) {
+      final Element? annotationElement = metadata.element;
+      if (annotationElement != null) {
+        final String? annotationName = annotationElement.name;
+        if (annotationName != null && _isDependencyInjectionAnnotation(annotationName, null)) {
+          return annotationName;
+        }
+      }
+    }
+    // Fallback to factory if we can't determine the annotation
+    return 'Factory';
+  }
+
+  /// Get registration type from annotation name
+  RegisterAs _getRegistrationTypeFromAnnotation(String annotationName) {
+    switch (annotationName) {
+      case 'Factory':
+        return RegisterAs.factory;
+      case 'Singleton':
+        return RegisterAs.singleton;
+      case 'LazySingleton':
+      case 'LazyFactory':
+        return RegisterAs.lazySingleton;
+      case 'AsyncFactory':
+        return RegisterAs.factoryAsync;
+      case 'AsyncSingleton':
+        return RegisterAs.singletonAsync;
+      case 'AsyncLazySingleton':
+        return RegisterAs.lazySingletonAsync;
+      default:
+        return RegisterAs.factory;
+    }
+  }
+
+  /// Check if annotation is async
+  bool _isAsyncAnnotation(String annotationName) => annotationName.startsWith('Async');
 
   /// Get constructor information including parameter signature and constructor call
   _ConstructorInfo _getConstructorInfo(ClassElement element) {
@@ -202,29 +280,6 @@ $className $methodName(${constructorInfo.parameterSignature}) {
     return 'null';
   }
 
-  /// Parse registration type from annotation object
-  RegisterAs _getRegistrationTypeFromObject(Object? value) {
-    if (value == null) {
-      return RegisterAs.factory;
-    }
-
-    final String valueString = value.toString();
-    if (valueString.contains('RegisterAs.factory')) {
-      return RegisterAs.factory;
-    }
-    if (valueString.contains('RegisterAs.singleton')) {
-      return RegisterAs.singleton;
-    }
-    if (valueString.contains('RegisterAs.lazySingleton')) {
-      return RegisterAs.lazySingleton;
-    }
-    // if (valueString.contains('RegisterAs.factoryAsync')) return RegisterAs.factoryAsync;
-    // if (valueString.contains('RegisterAs.lazySingletonAsync')) return RegisterAs.lazySingletonAsync;
-    // if (valueString.contains('RegisterAs.singletonAsync')) return RegisterAs.singletonAsync;
-
-    return RegisterAs.factory;
-  }
-
   /// Convert registration type enum to string representation
   String _getRegistrationTypeEnum(RegisterAs registrationType) {
     switch (registrationType) {
@@ -234,15 +289,29 @@ $className $methodName(${constructorInfo.parameterSignature}) {
         return 'RegisterAs.singleton';
       case RegisterAs.lazySingleton:
         return 'RegisterAs.lazySingleton';
-      default:
-        return 'RegisterAs.factory';
-      // case RegisterAs.factoryAsync:
-      //   return 'RegisterAs.factoryAsync';
-      // case RegisterAs.lazySingletonAsync:
-      //   return 'RegisterAs.lazySingletonAsync';
-      // case RegisterAs.singletonAsync:
-      //   return 'RegisterAs.singletonAsync';
+      case RegisterAs.factoryAsync:
+        return 'RegisterAs.factoryAsync';
+      case RegisterAs.lazySingletonAsync:
+        return 'RegisterAs.lazySingletonAsync';
+      case RegisterAs.singletonAsync:
+        return 'RegisterAs.singletonAsync';
     }
+  }
+
+  /// Check if annotation is a dependency injection annotation
+  bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
+    final List<String> dependencyInjectionAnnotations = [
+      'Factory',
+      'Singleton', 
+      'LazySingleton',
+      'LazyFactory',
+      'AsyncFactory',
+      'AsyncSingleton',
+      'AsyncLazySingleton',
+    ];
+
+    return dependencyInjectionAnnotations.contains(annotationName) ||
+           dependencyInjectionAnnotations.contains(annotationType);
   }
 }
 
@@ -280,8 +349,8 @@ class SourceDirectoryBuilder extends Builder {
     final LibraryElement library = await buildStep.resolver.libraryFor(inputId);
     final StringBuffer generatedCode = StringBuffer();
 
-    // Check if this file has any @AutoRegister annotations
-    final bool hasAutoRegisterAnnotations =
+    // Check if this file has any dependency injection annotations
+    final bool hasDependencyInjectionAnnotations =
         library.topLevelElements.any((Element element) {
       if (element.metadata.isEmpty) {
         return false;
@@ -290,14 +359,13 @@ class SourceDirectoryBuilder extends Builder {
       for (final ElementAnnotation metadata in element.metadata) {
         final Element? annotationElement = metadata.element;
         if (annotationElement != null) {
-          // Check if this is an AutoRegister annotation by checking the type
+          // Check if this is a dependency injection annotation by checking the type
           final String? annotationType =
               annotationElement.enclosingElement3?.name;
           final String? annotationName = annotationElement.name;
 
-          // Check if it's an AutoRegister annotation from our package
-          if (annotationName == 'AutoRegister' ||
-              annotationType == 'AutoRegister') {
+          // Check if it's a dependency injection annotation from our package
+          if (_isDependencyInjectionAnnotation(annotationName, annotationType)) {
             return true;
           }
         }
@@ -305,8 +373,8 @@ class SourceDirectoryBuilder extends Builder {
       return false;
     });
 
-    if (!hasAutoRegisterAnnotations) {
-      // Skip this file if it doesn't have @AutoRegister annotations
+    if (!hasDependencyInjectionAnnotations) {
+      // Skip this file if it doesn't have dependency injection annotations
       return;
     }
 
@@ -334,7 +402,7 @@ class SourceDirectoryBuilder extends Builder {
                 try {
                   final ConstantReader constantReader =
                       ConstantReader(metadata.computeConstantValue());
-                  final generated = generator.generateForAnnotatedElement(
+                  final String generated = generator.generateForAnnotatedElement(
                     element,
                     constantReader,
                     buildStep,
@@ -384,6 +452,22 @@ class SourceDirectoryBuilder extends Builder {
       // If no content was generated, don't create empty .g.dart files
     }
   }
+
+  /// Check if annotation is a dependency injection annotation
+  bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
+    final List<String> dependencyInjectionAnnotations = [
+      'Factory',
+      'Singleton', 
+      'LazySingleton',
+      'LazyFactory',
+      'AsyncFactory',
+      'AsyncSingleton',
+      'AsyncLazySingleton',
+    ];
+
+    return dependencyInjectionAnnotations.contains(annotationName) ||
+           dependencyInjectionAnnotations.contains(annotationType);
+  }
 }
 
 /// Builder for dependency injection code generation.
@@ -403,5 +487,5 @@ class SourceDirectoryBuilder extends Builder {
 /// ```
 Builder buildDiGenerator(BuilderOptions options) =>
     SourceDirectoryBuilder(<Generator>[
-      AutoRegisterGenerator(),
+      DependencyInjectionGenerator(),
     ]);

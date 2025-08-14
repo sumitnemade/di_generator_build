@@ -51,8 +51,6 @@ export 'get_it_extension.dart';
 /// - [RegisterAs.lazySingletonAsync]: Creates async instance on first use, then reuses it
 /// - [RegisterAs.singletonAsync]: Creates async instance immediately and reuses it
 class AutoRegister {
-  /// The registration type (factory, singleton, lazySingleton, etc.)
-  final RegisterAs registrationType;
 
   /// Creates an AutoRegister annotation.
   ///
@@ -60,4 +58,6 @@ class AutoRegister {
   const AutoRegister({
     this.registrationType = RegisterAs.factory,
   });
+  /// The registration type (factory, singleton, lazySingleton, etc.)
+  final RegisterAs registrationType;
 }

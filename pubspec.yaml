@@ -8,14 +8,13 @@ issue_tracker: https://github.com/sumitnemade/di_generator_build/issues
 
 documentation: https://github.com/sumitnemade/di_generator_build#readme
 
-# Add topics for better discoverability
+# Add topics for better discoverability (max 5 allowed by pub.dev)
 topics:
   - dependency-injection
   - code-generation
   - build-runner
   - getit
   - flutter
-  - dart
 
 # Add keywords for search
 keywords:

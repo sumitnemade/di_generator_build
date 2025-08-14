@@ -1,10 +1,9 @@
-library di_generator_build;
-
 /// A dependency injection code generator for Dart/Flutter applications using GetIt.
 ///
 /// This package provides intuitive annotations for automatic dependency injection
 /// code generation, making it easy to manage dependencies in your Dart/Flutter applications.
-///
+library;
+
 /// ## Features
 ///
 /// - **Intuitive Annotations**: Use clear annotations like @Factory, @Singleton, @LazySingleton
@@ -33,9 +32,9 @@ library di_generator_build;
 /// @Singleton()
 /// class MyService {
 ///   final Repository _repository;
-///   
+///
 ///   MyService(this._repository);
-///   
+///
 ///   void doSomething() {
 ///     // Your service logic
 ///   }
@@ -67,9 +66,9 @@ library di_generator_build;
 /// @Singleton()
 /// class UserService {
 ///   final UserRepository _repository;
-///   
+///
 ///   UserService(this._repository);
-///   
+///
 ///   Future<User> getUser(String id) async {
 ///     return await _repository.findById(id);
 ///   }
@@ -82,9 +81,9 @@ library di_generator_build;
 /// class EmailService {
 ///   final String _apiKey;
 ///   final EmailProvider _provider;
-///   
+///
 ///   EmailService(this._provider, [this._apiKey = 'default-key']);
-///   
+///
 ///   Future<void> sendEmail(String to, String subject, String body) async {
 ///     // Email sending logic
 ///   }
@@ -97,13 +96,13 @@ library di_generator_build;
 /// class DatabaseService {
 ///   final String _connectionString;
 ///   late final Database _database;
-///   
+///
 ///   DatabaseService(this._connectionString);
-///   
+///
 ///   Future<void> initialize() async {
 ///     _database = await Database.connect(_connectionString);
 ///   }
-///   
+///
 ///   Future<QueryResult> query(String sql) async {
 ///     return await _database.execute(sql);
 ///   }

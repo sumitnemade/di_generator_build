@@ -79,18 +79,20 @@ class DependencyInjectionGenerator extends GeneratorForAnnotation<Object> {
     }
 
     final String className = element.name;
-    
+
     // Get the annotation type from the element's metadata
     final String annotationName = _getAnnotationName(element, annotation);
 
     // Get registration type from annotation
-    final RegisterAs registrationType = _getRegistrationTypeFromAnnotation(annotationName);
+    final RegisterAs registrationType =
+        _getRegistrationTypeFromAnnotation(annotationName);
     final bool isAsync = _isAsyncAnnotation(annotationName);
 
     // Auto-detect constructor parameters
     final _ConstructorInfo constructorInfo = _getConstructorInfo(element);
     final String methodName = 'get$className';
-    final String registrationTypeEnum = _getRegistrationTypeEnum(registrationType);
+    final String registrationTypeEnum =
+        _getRegistrationTypeEnum(registrationType);
 
     if (isAsync) {
       return '''
@@ -116,7 +118,8 @@ $className $methodName(${constructorInfo.parameterSignature}) {
       final Element? annotationElement = metadata.element;
       if (annotationElement != null) {
         final String? annotationName = annotationElement.name;
-        if (annotationName != null && _isDependencyInjectionAnnotation(annotationName, null)) {
+        if (annotationName != null &&
+            _isDependencyInjectionAnnotation(annotationName, null)) {
           return annotationName;
         }
       }
@@ -147,7 +150,8 @@ $className $methodName(${constructorInfo.parameterSignature}) {
   }
 
   /// Check if annotation is async
-  bool _isAsyncAnnotation(String annotationName) => annotationName.startsWith('Async');
+  bool _isAsyncAnnotation(String annotationName) =>
+      annotationName.startsWith('Async');
 
   /// Get constructor information including parameter signature and constructor call
   _ConstructorInfo _getConstructorInfo(ClassElement element) {
@@ -298,10 +302,11 @@ $className $methodName(${constructorInfo.parameterSignature}) {
   }
 
   /// Check if annotation is a dependency injection annotation
-  bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
+  bool _isDependencyInjectionAnnotation(
+      String? annotationName, String? annotationType) {
     final List<String> dependencyInjectionAnnotations = <String>[
       'Factory',
-      'Singleton', 
+      'Singleton',
       'LazySingleton',
       'LazyFactory',
       'AsyncFactory',
@@ -310,7 +315,7 @@ $className $methodName(${constructorInfo.parameterSignature}) {
     ];
 
     return dependencyInjectionAnnotations.contains(annotationName) ||
-           dependencyInjectionAnnotations.contains(annotationType);
+        dependencyInjectionAnnotations.contains(annotationType);
   }
 }
 
@@ -359,12 +364,12 @@ class SourceDirectoryBuilder extends Builder {
         final Element? annotationElement = metadata.element;
         if (annotationElement != null) {
           // Check if this is a dependency injection annotation by checking the type
-          final String? annotationType =
-              annotationElement.library?.name;
+          final String? annotationType = annotationElement.library?.name;
           final String? annotationName = annotationElement.name;
 
           // Check if it's a dependency injection annotation from our package
-          if (_isDependencyInjectionAnnotation(annotationName, annotationType)) {
+          if (_isDependencyInjectionAnnotation(
+              annotationName, annotationType)) {
             return true;
           }
         }
@@ -401,7 +406,8 @@ class SourceDirectoryBuilder extends Builder {
                 try {
                   final ConstantReader constantReader =
                       ConstantReader(metadata.computeConstantValue());
-                  final String generated = generator.generateForAnnotatedElement(
+                  final String generated =
+                      generator.generateForAnnotatedElement(
                     element,
                     constantReader,
                     buildStep,
@@ -410,7 +416,7 @@ class SourceDirectoryBuilder extends Builder {
                     generatedCode.writeln(generated);
                     processedElements.add(key);
                   }
-                } on Exception{
+                } on Exception {
                   // Skip if annotation doesn't match
                 }
               }
@@ -453,10 +459,11 @@ class SourceDirectoryBuilder extends Builder {
   }
 
   /// Check if annotation is a dependency injection annotation
-  bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
+  bool _isDependencyInjectionAnnotation(
+      String? annotationName, String? annotationType) {
     final List<String> dependencyInjectionAnnotations = <String>[
       'Factory',
-      'Singleton', 
+      'Singleton',
       'LazySingleton',
       'LazyFactory',
       'AsyncFactory',
@@ -465,7 +472,7 @@ class SourceDirectoryBuilder extends Builder {
     ];
 
     return dependencyInjectionAnnotations.contains(annotationName) ||
-           dependencyInjectionAnnotations.contains(annotationType);
+        dependencyInjectionAnnotations.contains(annotationType);
   }
 }
 

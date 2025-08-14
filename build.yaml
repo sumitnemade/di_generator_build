@@ -1,0 +1,6 @@
+builders:
+  di_generator:
+    import: "package:di_generator_build/builder.dart"
+    builder_factories: ["buildDiGenerator"]
+    build_extensions: {".dart": [".g.dart"]}
+    auto_apply: dependents

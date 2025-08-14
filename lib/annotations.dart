@@ -1,5 +1,3 @@
-import 'get_it_extension.dart';
-
 // Re-export get_it_extension.dart so users only need to import annotations.dart
 export 'get_it_extension.dart';
 

@@ -1,14 +1,15 @@
-name: di_generator_build_example
-description: Example application demonstrating the usage of di_generator_build package.
+name: example
+description: Example usage of di_generator_build package
+publish_to: none
 version: 1.0.0
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  get_it: ^7.6.0
   di_generator_build:
     path: ../
+  get_it: ^7.6.0
 
 dev_dependencies:
   build_runner: ^2.4.0

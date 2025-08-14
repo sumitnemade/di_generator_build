@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
@@ -300,7 +299,7 @@ $className $methodName(${constructorInfo.parameterSignature}) {
 
   /// Check if annotation is a dependency injection annotation
   bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
-    final List<String> dependencyInjectionAnnotations = [
+    final List<String> dependencyInjectionAnnotations = <String>[
       'Factory',
       'Singleton', 
       'LazySingleton',
@@ -455,7 +454,7 @@ class SourceDirectoryBuilder extends Builder {
 
   /// Check if annotation is a dependency injection annotation
   bool _isDependencyInjectionAnnotation(String? annotationName, String? annotationType) {
-    final List<String> dependencyInjectionAnnotations = [
+    final List<String> dependencyInjectionAnnotations = <String>[
       'Factory',
       'Singleton', 
       'LazySingleton',

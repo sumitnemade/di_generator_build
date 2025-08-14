@@ -133,5 +133,5 @@ library di_generator_build;
 /// This package is open source and contributions are welcome! Please see the
 /// [GitHub repository](https://github.com/your-username/di_generator_build) for more information.
 export 'annotations.dart';
-export 'get_it_extension.dart';
 export 'builder.dart';
+export 'get_it_extension.dart';

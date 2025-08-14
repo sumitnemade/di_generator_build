@@ -1,287 +1,121 @@
 // Re-export get_it_extension.dart so users only need to import annotations.dart
 export 'get_it_extension.dart';
 
-/// Factory annotation - creates a new instance each time.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as a factory, creating a new instance every time it's requested.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as a factory dependency.
+/// 
+/// When applied to a class, it will be registered as a factory in GetIt,
+/// meaning a new instance will be created each time it's requested.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @Factory()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   void doSomething() {
-///     // Your service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// MyService getMyService({String apiKey = 'default-key'}) {
-///   return GetIt.instance.getOrRegister<MyService>(
-///       () => MyService(getRepository(), apiKey), RegisterAs.factory);
+///   // This class will be registered as a factory
 /// }
 /// ```
 class Factory {
-  /// Creates a Factory annotation.
+  /// Creates a factory annotation.
   const Factory();
 }
 
-/// Singleton annotation - creates instance immediately and reuses it.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as a singleton, creating the instance immediately and reusing it for all subsequent requests.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as a singleton dependency.
+/// 
+/// When applied to a class, it will be registered as a singleton in GetIt,
+/// meaning the same instance will be returned for all requests.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @Singleton()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   void doSomething() {
-///     // Your service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// MyService getMyService({String apiKey = 'default-key'}) {
-///   return GetIt.instance.getOrRegister<MyService>(
-///       () => MyService(getRepository(), apiKey), RegisterAs.singleton);
+///   // This class will be registered as a singleton
 /// }
 /// ```
 class Singleton {
-  /// Creates a Singleton annotation.
+  /// Creates a singleton annotation.
   const Singleton();
 }
 
-/// LazySingleton annotation - creates instance on first use, then reuses it.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as a lazy singleton, creating the instance only when first needed and then reusing it.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as a lazy singleton dependency.
+/// 
+/// When applied to a class, it will be registered as a lazy singleton in GetIt,
+/// meaning the instance will only be created when first requested.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @LazySingleton()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   void doSomething() {
-///     // Your service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// MyService getMyService({String apiKey = 'default-key'}) {
-///   return GetIt.instance.getOrRegister<MyService>(
-///       () => MyService(getRepository(), apiKey), RegisterAs.lazySingleton);
+///   // This class will be registered as a lazy singleton
 /// }
 /// ```
 class LazySingleton {
-  /// Creates a LazySingleton annotation.
+  /// Creates a lazy singleton annotation.
   const LazySingleton();
 }
 
-/// LazyFactory annotation - creates instance on first use, then reuses it (alias for LazySingleton).
-///
-/// This annotation is an alias for LazySingleton, providing an alternative naming convention.
-///
-/// ## Usage
-///
+/// Alias for [LazySingleton] for better readability.
+/// 
+/// This annotation is equivalent to [LazySingleton] and provides
+/// an alternative naming convention that some developers prefer.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @LazyFactory()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   void doSomething() {
-///     // Your service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// MyService getMyService({String apiKey = 'default-key'}) {
-///       () => MyService(getRepository(), apiKey), RegisterAs.lazySingleton);
+///   // This class will be registered as a lazy singleton
 /// }
 /// ```
 class LazyFactory {
-  /// Creates a LazyFactory annotation.
+  /// Creates a lazy factory annotation.
   const LazyFactory();
 }
 
-/// AsyncFactory annotation - creates a new async instance each time.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as an async factory, creating a new async instance every time it's requested.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as an async factory dependency.
+/// 
+/// When applied to a class, it will be registered as an async factory in GetIt,
+/// meaning an async method will be called to create new instances.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @AsyncFactory()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   Future<void> doSomething() async {
-///     // Your async service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// Future<MyService> getMyService({String apiKey = 'default-key'}) async {
-///   return await GetIt.instance.getOrRegisterAsync<MyService>(
-///       () async => MyService(getRepository(), apiKey), RegisterAs.factoryAsync);
+///   // This class will be registered as an async factory
 /// }
 /// ```
 class AsyncFactory {
-  /// Creates an AsyncFactory annotation.
+  /// Creates an async factory annotation.
   const AsyncFactory();
 }
 
-/// AsyncSingleton annotation - creates async instance immediately and reuses it.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as an async singleton, creating the async instance immediately and reusing it.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as an async singleton dependency.
+/// 
+/// When applied to a class, it will be registered as an async singleton in GetIt,
+/// meaning an async method will be called to create the instance once.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
-/// @Singleton()
+/// @AsyncSingleton()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   Future<void> doSomething() async {
-///     // Your async service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// Future<MyService> getMyService({String apiKey = 'default-key'}) async {
-///   return await GetIt.instance.getOrRegisterAsync<MyService>(
-///       () async => MyService(getRepository(), apiKey), RegisterAs.singletonAsync);
+///   // This class will be registered as an async singleton
 /// }
 /// ```
 class AsyncSingleton {
-  /// Creates an AsyncSingleton annotation.
+  /// Creates an async singleton annotation.
   const AsyncSingleton();
 }
 
-/// AsyncLazySingleton annotation - creates async instance on first use, then reuses it.
-///
-/// This annotation will automatically generate a method that registers the class with GetIt
-/// as an async lazy singleton, creating the async instance only when first needed.
-///
-/// ## Usage
-///
+/// Annotation to mark a class as an async lazy singleton dependency.
+/// 
+/// When applied to a class, it will be registered as an async lazy singleton in GetIt,
+/// meaning an async method will be called to create the instance when first requested.
+/// 
+/// Example:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
-/// import 'package:get_it/get_it.dart';
-///
-/// part 'my_service.g.dart';
-///
 /// @AsyncLazySingleton()
 /// class MyService {
-///   final Repository _repository;
-///   final String _apiKey;
-///   
-///   MyService(this._repository, [this._apiKey = 'default-key']);
-///   
-///   Future<void> doSomething() async {
-///     // Your async service logic
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The annotation will generate:
-///
-/// ```dart
-/// Future<MyService> getMyService({String apiKey = 'default-key'}) async {
-///   return await GetIt.instance.getOrRegisterAsync<MyService>(
-///       () async => MyService(getRepository(), apiKey), RegisterAs.lazySingletonAsync);
+///   // This class will be registered as an async lazy singleton
 /// }
 /// ```
 class AsyncLazySingleton {
-  /// Creates an AsyncLazySingleton annotation.
+  /// Creates an async lazy singleton annotation.
   const AsyncLazySingleton();
 }

@@ -360,7 +360,7 @@ class SourceDirectoryBuilder extends Builder {
         if (annotationElement != null) {
           // Check if this is a dependency injection annotation by checking the type
           final String? annotationType =
-              annotationElement.enclosingElement3?.name;
+              annotationElement.library?.name;
           final String? annotationName = annotationElement.name;
 
           // Check if it's a dependency injection annotation from our package

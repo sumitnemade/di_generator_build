@@ -1,6 +1,6 @@
 name: di_generator_build
 description: A powerful build runner package for automatic dependency injection code generation using GetIt in Flutter applications.
-version: 1.1.0
+version: 1.2.0
 
 homepage: https://github.com/sumitnemade/di_generator_build
 repository: https://github.com/sumitnemade/di_generator_build

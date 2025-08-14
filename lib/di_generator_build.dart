@@ -1,43 +1,33 @@
-/// A dependency injection code generator for Dart/Flutter applications using GetIt.
+/// A powerful build runner package for automatic dependency injection code generation using GetIt in Flutter applications.
 ///
-/// This package provides intuitive annotations for automatic dependency injection
-/// code generation, making it easy to manage dependencies in your Dart/Flutter applications.
-library;
-
-/// ## Features
-///
-/// - **Intuitive Annotations**: Use clear annotations like @Factory, @Singleton, @LazySingleton
-/// - **Automatic Code Generation**: Generates dependency injection methods automatically
-/// - **GetIt Integration**: Seamlessly integrates with the GetIt service locator
-/// - **Async Support**: Full support for async dependency initialization
-/// - **Performance Optimized**: Efficient dependency resolution with GetIt integration
+/// This package provides a comprehensive solution for automatic dependency injection
+/// by analyzing your code and generating the necessary GetIt registration code.
+/// It supports various registration patterns including factories, singletons, and lazy singletons,
+/// with both synchronous and asynchronous initialization.
 ///
 /// ## Quick Start
 ///
 /// 1. Add the package to your `pubspec.yaml`:
 /// ```yaml
-/// dependencies:
-///   di_generator_build: ^1.0.0
-///
 /// dev_dependencies:
-///   build_runner: ^2.4.0
+///   di_generator_build: ^1.2.0
+///   build_runner: ^2.5.4
 /// ```
 ///
-/// 2. Use annotations in your code:
+/// 2. Annotate your classes:
 /// ```dart
-/// import 'package:di_generator_build/di_generator_build.dart';
+/// import 'package:di_generator_build/annotations.dart';
 ///
-/// part 'my_service.g.dart';
+/// @RegisterSingleton()
+/// class AppConfig {
+///   final String apiUrl;
+///   AppConfig({required this.apiUrl});
+/// }
 ///
-/// @Singleton()
-/// class MyService {
-///   final Repository _repository;
-///
-///   MyService(this._repository);
-///
-///   void doSomething() {
-///     // Your service logic
-///   }
+/// @RegisterLazySingleton()
+/// class HttpClient {
+///   final AppConfig _config;
+///   HttpClient(this._config);
 /// }
 /// ```
 ///
@@ -46,91 +36,58 @@ library;
 /// dart run build_runner build
 /// ```
 ///
+/// 4. Use the generated methods:
+/// ```dart
+/// import 'your_file.g.dart';
+///
+/// void main() {
+///   final config = getAppConfig(apiUrl: 'https://api.example.com');
+///   final client = getHttpClient(); // Automatically gets AppConfig dependency
+/// }
+/// ```
+///
 /// ## Available Annotations
 ///
-/// ### Synchronous Annotations
-/// - **@Factory()**: Creates new instance each time
-/// - **@Singleton()**: Creates instance immediately and reuses it
-/// - **@LazySingleton()**: Creates instance on first use, then reuses it
-/// - **@LazyFactory()**: Alias for LazySingleton (alternative naming)
+/// - **@RegisterFactory()**: Creates new instance each time
+/// - **@RegisterSingleton()**: Creates instance immediately and reuses it
+/// - **@RegisterLazySingleton()**: Creates instance on first use, then reuses it
+/// - **@RegisterAsyncFactory()**: Creates new async instance each time
+/// - **@RegisterAsyncSingleton()**: Creates async instance immediately and reuses it
+/// - **@RegisterAsyncLazySingleton()**: Creates async instance on first use, then reuses it
 ///
-/// ### Asynchronous Annotations
-/// - **@AsyncFactory()**: Creates a new async instance each time
-/// - **@AsyncSingleton()**: Creates async instance immediately and reuses it
-/// - **@AsyncLazySingleton()**: Creates async instance on first use, then reuses it
+/// ## Features
 ///
-/// ## Examples
+/// - **Automatic dependency resolution**: Dependencies are automatically injected
+/// - **Lazy loading**: Optimize performance by creating dependencies only when needed
+/// - **Async support**: Handle asynchronous dependency creation and resolution
+/// - **Type safety**: Full type safety with Dart's static analysis
+/// - **GetIt integration**: Seamless integration with the GetIt service locator
+/// - **Build-time generation**: No runtime overhead, all code generated at build time
 ///
-/// ### Basic Service
-/// ```dart
-/// @Singleton()
-/// class UserService {
-///   final UserRepository _repository;
+/// ## Benefits
 ///
-///   UserService(this._repository);
+/// - **Performance optimization**: Lazy singletons create dependencies only when first requested
+/// - **Memory efficiency**: Factories create new instances each time, singletons reuse instances
+/// - **Async initialization**: Handle complex initialization scenarios with async support
+/// - **Clean architecture**: Separate dependency creation from business logic
+/// - **Testability**: Easy to mock and test with dependency injection
 ///
-///   Future<User> getUser(String id) async {
-///     return await _repository.findById(id);
-///   }
-/// }
+/// ## Configuration
+///
+/// Add to your `build.yaml`:
+/// ```yaml
+/// targets:
+///   $default:
+///     builders:
+///       di_generator_build|di_generator:
+///         enabled: true
 /// ```
 ///
-/// ### Service with Parameters
-/// ```dart
-/// @Factory()
-/// class EmailService {
-///   final String _apiKey;
-///   final EmailProvider _provider;
+/// ## Example
 ///
-///   EmailService(this._provider, [this._apiKey = 'default-key']);
-///
-///   Future<void> sendEmail(String to, String subject, String body) async {
-///     // Email sending logic
-///   }
-/// }
-/// ```
-///
-/// ### Async Service
-/// ```dart
-/// @AsyncLazySingleton()
-/// class DatabaseService {
-///   final String _connectionString;
-///   late final Database _database;
-///
-///   DatabaseService(this._connectionString);
-///
-///   Future<void> initialize() async {
-///     _database = await Database.connect(_connectionString);
-///   }
-///
-///   Future<QueryResult> query(String sql) async {
-///     return await _database.execute(sql);
-///   }
-/// }
-/// ```
-///
-/// ## Generated Code
-///
-/// The package automatically generates getter methods for each annotated class:
-///
-/// ```dart
-/// // For @Singleton() class UserService
-/// UserService getUserService() {
-///   return GetIt.instance.getOrRegister<UserService>(
-///       () => UserService(getUserRepository()), RegisterAs.singleton);
-/// }
-///
-/// // For @AsyncFactory() class DatabaseService
-/// Future<DatabaseService> getDatabaseService({String connectionString = 'default'}) async {
-///   return await GetIt.instance.getOrRegisterAsync<DatabaseService>(
-///       () async => DatabaseService(connectionString), RegisterAs.factoryAsync);
-/// }
-/// ```
-///
-/// ## Contributing
-///
-/// This package is open source and contributions are welcome! Please see the
-/// [GitHub repository](https://github.com/your-username/di_generator_build) for more information.
+/// See the `example/` directory for a complete working example.
+library;
+
 export 'annotations.dart';
 export 'builder.dart';
 export 'get_it_extension.dart';

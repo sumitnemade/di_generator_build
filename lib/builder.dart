@@ -8,24 +8,23 @@ import 'annotations.dart';
 
 /// Generator that creates dependency injection methods for classes annotated with dependency injection annotations.
 ///
-/// This generator automatically analyzes classes with annotations like @Factory, @Singleton, @LazySingleton, etc.
+/// This generator automatically analyzes classes with annotations like @RegisterFactory, @RegisterSingleton, @RegisterLazySingleton, etc.
 /// and generates appropriate dependency injection methods that integrate with GetIt.
 ///
 /// ## Supported Annotations
 ///
-/// - [Factory]: Creates new instance each time
-/// - [Singleton]: Creates instance immediately and reuses it
-/// - [LazySingleton]: Creates instance on first use, then reuses it
-/// - [LazyFactory]: Alias for LazySingleton
-/// - [AsyncFactory]: Creates new async instance each time
-/// - [AsyncSingleton]: Creates async instance immediately and reuses it
-/// - [AsyncLazySingleton]: Creates async instance on first use, then reuses it
+/// - [RegisterFactory]: Creates new instance each time
+/// - [RegisterSingleton]: Creates instance immediately and reuses it
+/// - [RegisterLazySingleton]: Creates instance on first use, then reuses it
+/// - [RegisterAsyncFactory]: Creates new async instance each time
+/// - [RegisterAsyncSingleton]: Creates async instance immediately and reuses it
+/// - [RegisterAsyncLazySingleton]: Creates async instance on first use, then reuses it
 ///
 /// ## Generated Output
 ///
 /// For a class like:
 /// ```dart
-/// @Singleton()
+/// @RegisterSingleton()
 /// class MyService {
 ///   final Repository _repository;
 ///   final String _apiKey;
@@ -44,7 +43,7 @@ import 'annotations.dart';
 ///
 /// For async classes:
 /// ```dart
-/// @AsyncFactory()
+/// @RegisterAsyncFactory()
 /// class MyService {
 ///   final Repository _repository;
 ///   final String _apiKey;
@@ -131,18 +130,17 @@ $className $methodName(${constructorInfo.parameterSignature}) {
   /// Get registration type from annotation name
   RegisterAs _getRegistrationTypeFromAnnotation(String annotationName) {
     switch (annotationName) {
-      case 'Factory':
+      case 'RegisterFactory':
         return RegisterAs.factory;
-      case 'Singleton':
+      case 'RegisterSingleton':
         return RegisterAs.singleton;
-      case 'LazySingleton':
-      case 'LazyFactory':
+      case 'RegisterLazySingleton':
         return RegisterAs.lazySingleton;
-      case 'AsyncFactory':
+      case 'RegisterAsyncFactory':
         return RegisterAs.factoryAsync;
-      case 'AsyncSingleton':
+      case 'RegisterAsyncSingleton':
         return RegisterAs.singletonAsync;
-      case 'AsyncLazySingleton':
+      case 'RegisterAsyncLazySingleton':
         return RegisterAs.lazySingletonAsync;
       default:
         return RegisterAs.factory;
@@ -151,7 +149,7 @@ $className $methodName(${constructorInfo.parameterSignature}) {
 
   /// Check if annotation is async
   bool _isAsyncAnnotation(String annotationName) =>
-      annotationName.startsWith('Async');
+      annotationName.startsWith('RegisterAsync');
 
   /// Get constructor information including parameter signature and constructor call
   _ConstructorInfo _getConstructorInfo(ClassElement element) {
@@ -305,13 +303,12 @@ $className $methodName(${constructorInfo.parameterSignature}) {
   bool _isDependencyInjectionAnnotation(
       String? annotationName, String? annotationType) {
     final List<String> dependencyInjectionAnnotations = <String>[
-      'Factory',
-      'Singleton',
-      'LazySingleton',
-      'LazyFactory',
-      'AsyncFactory',
-      'AsyncSingleton',
-      'AsyncLazySingleton',
+      'RegisterFactory',
+      'RegisterSingleton',
+      'RegisterLazySingleton',
+      'RegisterAsyncFactory',
+      'RegisterAsyncSingleton',
+      'RegisterAsyncLazySingleton',
     ];
 
     return dependencyInjectionAnnotations.contains(annotationName) ||
@@ -462,13 +459,12 @@ class SourceDirectoryBuilder extends Builder {
   bool _isDependencyInjectionAnnotation(
       String? annotationName, String? annotationType) {
     final List<String> dependencyInjectionAnnotations = <String>[
-      'Factory',
-      'Singleton',
-      'LazySingleton',
-      'LazyFactory',
-      'AsyncFactory',
-      'AsyncSingleton',
-      'AsyncLazySingleton',
+      'RegisterFactory',
+      'RegisterSingleton',
+      'RegisterLazySingleton',
+      'RegisterAsyncFactory',
+      'RegisterAsyncSingleton',
+      'RegisterAsyncLazySingleton',
     ];
 
     return dependencyInjectionAnnotations.contains(annotationName) ||

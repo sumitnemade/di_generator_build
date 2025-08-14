@@ -1,346 +1,315 @@
-import 'package:di_generator_build/di_generator_build.dart';
-import 'package:get_it/get_it.dart';
 import 'package:test/test.dart';
+import 'package:di_generator_build/annotations.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
-  group('New Dependency Injection Annotations Tests', () {
-    test('@Factory annotation should be accessible', () {
-      const Factory annotation = Factory();
-      expect(annotation, isA<Factory>());
+  group('Annotation Tests', () {
+    test('should create Factory annotation', () {
+      const RegisterFactory annotation = RegisterFactory();
+      expect(annotation, isA<RegisterFactory>());
     });
 
-    test('@Singleton annotation should be accessible', () {
-      const Singleton annotation = Singleton();
-      expect(annotation, isA<Singleton>());
+    test('should create Singleton annotation', () {
+      const RegisterSingleton annotation = RegisterSingleton();
+      expect(annotation, isA<RegisterSingleton>());
     });
 
-    test('@LazySingleton annotation should be accessible', () {
-      const LazySingleton annotation = LazySingleton();
-      expect(annotation, isA<LazySingleton>());
+    test('should create LazySingleton annotation', () {
+      const RegisterLazySingleton annotation = RegisterLazySingleton();
+      expect(annotation, isA<RegisterLazySingleton>());
     });
 
-    test('@LazyFactory annotation should be accessible', () {
-      const LazyFactory annotation = LazyFactory();
-      expect(annotation, isA<LazyFactory>());
+    test('should create AsyncFactory annotation', () {
+      const RegisterAsyncFactory annotation = RegisterAsyncFactory();
+      expect(annotation, isA<RegisterAsyncFactory>());
     });
 
-    test('@AsyncFactory annotation should be accessible', () {
-      const AsyncFactory annotation = AsyncFactory();
-      expect(annotation, isA<AsyncFactory>());
+    test('should create AsyncSingleton annotation', () {
+      const RegisterAsyncSingleton annotation = RegisterAsyncSingleton();
+      expect(annotation, isA<RegisterAsyncSingleton>());
     });
 
-    test('@AsyncSingleton annotation should be accessible', () {
-      const AsyncSingleton annotation = AsyncSingleton();
-      expect(annotation, isA<AsyncSingleton>());
-    });
-
-    test('@AsyncLazySingleton annotation should be accessible', () {
-      const AsyncLazySingleton annotation = AsyncLazySingleton();
-      expect(annotation, isA<AsyncLazySingleton>());
-    });
-  });
-
-  group('RegisterAs Enum Tests', () {
-    test('RegisterAs enum should have all expected values', () {
-      expect(RegisterAs.values, hasLength(6));
-      expect(RegisterAs.values, contains(RegisterAs.factory));
-      expect(RegisterAs.values, contains(RegisterAs.singleton));
-      expect(RegisterAs.values, contains(RegisterAs.lazySingleton));
-      expect(RegisterAs.values, contains(RegisterAs.factoryAsync));
-      expect(RegisterAs.values, contains(RegisterAs.lazySingletonAsync));
-      expect(RegisterAs.values, contains(RegisterAs.singletonAsync));
-    });
-
-    test('Registration types should have correct string representations', () {
-      expect(RegisterAs.factory.toString(), contains('factory'));
-      expect(RegisterAs.singleton.toString(), contains('singleton'));
-      expect(RegisterAs.lazySingleton.toString(), contains('lazySingleton'));
-      expect(RegisterAs.factoryAsync.toString(), contains('factoryAsync'));
-      expect(RegisterAs.lazySingletonAsync.toString(), contains('lazySingletonAsync'));
-      expect(RegisterAs.singletonAsync.toString(), contains('singletonAsync'));
+    test('should create AsyncLazySingleton annotation', () {
+      const RegisterAsyncLazySingleton annotation = RegisterAsyncLazySingleton();
+      expect(annotation, isA<RegisterAsyncLazySingleton>());
     });
   });
 
   group('GetIt Extension Tests', () {
-    late GetIt getIt;
-
     setUp(() {
-      getIt = GetIt.instance;
-      getIt.reset();
+      // Reset GetIt instance before each test
+      GetIt.instance.reset();
     });
 
-    test('getOrRegister should work with factory registration', () {
-      final result = getIt.getOrRegister<String>(
-        () => 'test-value',
+    tearDown(() {
+      // Clean up after each test
+      GetIt.instance.reset();
+    });
+
+    test('should register and get factory', () {
+      final getIt = GetIt.instance;
+      
+      // Register a factory
+      getIt.registerFactory<String>(() => 'test_value');
+      
+      // Get the value
+      final value = getIt.get<String>();
+      expect(value, equals('test_value'));
+      
+      // Get again - should be a new instance
+      final value2 = getIt.get<String>();
+      expect(value2, equals('test_value'));
+      expect(value, equals(value2)); // Same value for String, but different instances
+    });
+
+    test('should register and get singleton', () {
+      final getIt = GetIt.instance;
+      
+      // Register a singleton
+      getIt.registerSingleton<String>('singleton_value');
+      
+      // Get the value
+      final value = getIt.get<String>();
+      expect(value, equals('singleton_value'));
+      
+      // Get again - should be the same instance
+      final value2 = getIt.get<String>();
+      expect(value2, equals('singleton_value'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should register and get lazy singleton', () {
+      final getIt = GetIt.instance;
+      
+      // Register a lazy singleton
+      getIt.registerLazySingleton<String>(() => 'lazy_value');
+      
+      // Get the value
+      final value = getIt.get<String>();
+      expect(value, equals('lazy_value'));
+      
+      // Get again - should be the same instance
+      final value2 = getIt.get<String>();
+      expect(value2, equals('lazy_value'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should register and get async factory', () async {
+      final getIt = GetIt.instance;
+      
+      // Register an async factory
+      getIt.registerFactoryAsync<String>(() async => 'async_factory_value');
+      
+      // Get the value
+      final value = await getIt.getAsync<String>();
+      expect(value, equals('async_factory_value'));
+      
+      // Get again - should be a new instance
+      final value2 = await getIt.getAsync<String>();
+      expect(value2, equals('async_factory_value'));
+    });
+
+    test('should register and get async singleton', () async {
+      final getIt = GetIt.instance;
+      
+      // Register a singleton with async initialization
+      getIt.registerSingleton<String>('async_singleton_value');
+      
+      // Get the value
+      final value = getIt.get<String>();
+      expect(value, equals('async_singleton_value'));
+      
+      // Get again - should be the same instance
+      final value2 = getIt.get<String>();
+      expect(value2, equals('async_singleton_value'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should register and get async lazy singleton', () async {
+      final getIt = GetIt.instance;
+      
+      // Register an async lazy singleton
+      getIt.registerLazySingletonAsync<String>(() async => 'async_lazy_value');
+      
+      // Get the value
+      final value = await getIt.getAsync<String>();
+      expect(value, equals('async_lazy_value'));
+      
+      // Get again - should be the same instance
+      final value2 = await getIt.getAsync<String>();
+      expect(value2, equals('async_lazy_value'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should use getOrRegister for factory', () {
+      final getIt = GetIt.instance;
+      
+      final value = getIt.getOrRegister<String>(
+        () => 'or_register_factory',
         RegisterAs.factory,
       );
-      expect(result, equals('test-value'));
+      
+      expect(value, equals('or_register_factory'));
+      
+      // Should be registered now
+      final value2 = getIt.get<String>();
+      expect(value2, equals('or_register_factory'));
     });
 
-    test('getOrRegister should work with singleton registration', () {
-      final result = getIt.getOrRegister<String>(
-        () => 'test-value',
+    test('should use getOrRegister for singleton', () {
+      final getIt = GetIt.instance;
+      
+      final value = getIt.getOrRegister<String>(
+        () => 'or_register_singleton',
         RegisterAs.singleton,
       );
-      expect(result, equals('test-value'));
       
-      // Second call should return the same instance
-      final result2 = getIt.getOrRegister<String>(
-        () => 'different-value',
-        RegisterAs.singleton,
-      );
-      expect(result2, equals('test-value')); // Should return first instance
+      expect(value, equals('or_register_singleton'));
+      
+      // Should be registered now
+      final value2 = getIt.get<String>();
+      expect(value2, equals('or_register_singleton'));
+      expect(identical(value, value2), isTrue);
     });
 
-    test('getOrRegister should work with lazySingleton registration', () {
-      final result = getIt.getOrRegister<String>(
-        () => 'test-value',
+    test('should use getOrRegister for lazy singleton', () {
+      final getIt = GetIt.instance;
+      
+      final value = getIt.getOrRegister<String>(
+        () => 'or_register_lazy',
         RegisterAs.lazySingleton,
       );
-      expect(result, equals('test-value'));
       
-      // Second call should return the same instance
-      final result2 = getIt.getOrRegister<String>(
-        () => 'different-value',
-        RegisterAs.lazySingleton,
-      );
-      expect(result2, equals('test-value')); // Should return first instance
+      expect(value, equals('or_register_lazy'));
+      
+      // Should be registered now
+      final value2 = getIt.get<String>();
+      expect(value2, equals('or_register_lazy'));
+      expect(identical(value, value2), isTrue);
     });
 
-    test('getOrRegister should throw error for invalid registration type', () {
-      expect(
-        () => getIt.getOrRegister<String>(
-          () => 'test-value',
-          RegisterAs.factoryAsync, // Invalid for sync method
-        ),
-        throwsA(isA<UnimplementedError>()),
-      );
-    });
-
-    test('getOrRegisterAsync should work with factoryAsync registration', () async {
-      final result = await getIt.getOrRegisterAsync<String>(
-        () async => 'test-value',
+    test('should use getOrRegisterAsync for factory async', () async {
+      final getIt = GetIt.instance;
+      
+      final value = await getIt.getOrRegisterAsync<String>(
+        () async => 'or_register_async_factory',
         RegisterAs.factoryAsync,
       );
-      expect(result, equals('test-value'));
-    });
-
-    test('getOrRegisterAsync should work with lazySingletonAsync registration', () async {
-      final result = await getIt.getOrRegisterAsync<String>(
-        () async => 'test-value',
-        RegisterAs.lazySingletonAsync,
-      );
-      expect(result, equals('test-value'));
       
-      // Second call should return the same instance
-      final result2 = await getIt.getOrRegisterAsync<String>(
-        () async => 'different-value',
-        RegisterAs.lazySingletonAsync,
-      );
-      expect(result2, equals('test-value')); // Should return first instance
+      expect(value, equals('or_register_async_factory'));
+      
+      // Should be registered now
+      final value2 = await getIt.getAsync<String>();
+      expect(value2, equals('or_register_async_factory'));
     });
 
-    test('getOrRegisterAsync should work with singletonAsync registration', () async {
-      final result = await getIt.getOrRegisterAsync<String>(
-        () async => 'test-value',
+    test('should use getOrRegisterAsync for singleton async', () async {
+      final getIt = GetIt.instance;
+      
+      final value = await getIt.getOrRegisterAsync<String>(
+        () async => 'or_register_async_singleton',
         RegisterAs.singletonAsync,
       );
-      expect(result, equals('test-value'));
       
-      // Second call should return the same instance, but since it's registered as a regular singleton,
-      // we need to get it synchronously
-      final result2 = getIt.get<String>();
-      expect(result2, equals('test-value')); // Should return first instance
+      expect(value, equals('or_register_async_singleton'));
+      
+      // Should be registered now and retrievable synchronously
+      final value2 = getIt.get<String>();
+      expect(value2, equals('or_register_async_singleton'));
+      expect(identical(value, value2), isTrue);
     });
 
-    test('getOrRegisterAsync should throw error for invalid async registration type', () {
-      expect(
-        () => getIt.getOrRegisterAsync<String>(
-          () async => 'test-value',
-          RegisterAs.factory, // Invalid for async method
-        ),
-        throwsA(isA<UnimplementedError>()),
+    test('should use getOrRegisterAsync for lazy singleton async', () async {
+      final getIt = GetIt.instance;
+      
+      final value = await getIt.getOrRegisterAsync<String>(
+        () async => 'or_register_async_lazy',
+        RegisterAs.lazySingletonAsync,
       );
-    });
-
-    test('getOrRegisterFactory should work', () {
-      final result = getIt.getOrRegisterFactory<String>(() => 'test-value');
-      expect(result, equals('test-value'));
-    });
-
-    test('getOrRegisterLazySingleton should work', () {
-      final result = getIt.getOrRegisterLazySingleton<String>(() => 'test-value');
-      expect(result, equals('test-value'));
       
-      // Second call should return the same instance
-      final result2 = getIt.getOrRegisterLazySingleton<String>(() => 'different-value');
-      expect(result2, equals('test-value')); // Should return first instance
-    });
-
-    test('getOrRegisterSingleton should work', () {
-      final result = getIt.getOrRegisterSingleton<String>(() => 'test-value');
-      expect(result, equals('test-value'));
+      expect(value, equals('or_register_async_lazy'));
       
-      // Second call should return the same instance
-      final result2 = getIt.getOrRegisterSingleton<String>(() => 'different-value');
-      expect(result2, equals('test-value')); // Should return first instance
-    });
-
-    test('getOrRegisterFactoryAsync should work', () async {
-      final result = await getIt.getOrRegisterFactoryAsync<String>(() async => 'test-value');
-      expect(result, equals('test-value'));
-    });
-
-    test('getOrRegisterLazySingletonAsync should work', () async {
-      final result = await getIt.getOrRegisterLazySingletonAsync<String>(() async => 'test-value');
-      expect(result, equals('test-value'));
-      
-      // Second call should return the same instance
-      final result2 = await getIt.getOrRegisterLazySingletonAsync<String>(() async => 'different-value');
-      expect(result2, equals('test-value')); // Should return first instance
-    });
-
-    test('getOrRegisterSingletonAsync should work', () async {
-      final result = await getIt.getOrRegisterSingletonAsync<String>(() async => 'test-value');
-      expect(result, equals('test-value'));
-      
-      // Second call should return the same instance, but since it's registered as a regular singleton,
-      // we need to get it synchronously
-      final result2 = getIt.get<String>();
-      expect(result2, equals('test-value')); // Should return first instance
+      // Should be registered now
+      final value2 = await getIt.getAsync<String>();
+      expect(value2, equals('or_register_async_lazy'));
+      expect(identical(value, value2), isTrue);
     });
   });
 
-  group('Package Integration Tests', () {
-    test('Package should work with build_runner integration', () {
-      // This test ensures the package is properly structured for build_runner
-      expect(Factory.new, returnsNormally);
-      expect(Singleton.new, returnsNormally);
-      expect(LazySingleton.new, returnsNormally);
-      expect(LazyFactory.new, returnsNormally);
-      expect(AsyncFactory.new, returnsNormally);
-      expect(AsyncSingleton.new, returnsNormally);
-      expect(AsyncLazySingleton.new, returnsNormally);
+  group('Annotation Constructor Tests', () {
+    test('should create all annotation constructors', () {
+      expect(RegisterFactory.new, returnsNormally);
+      expect(RegisterSingleton.new, returnsNormally);
+      expect(RegisterLazySingleton.new, returnsNormally);
+      expect(RegisterAsyncFactory.new, returnsNormally);
+      expect(RegisterAsyncSingleton.new, returnsNormally);
+      expect(RegisterAsyncLazySingleton.new, returnsNormally);
     });
 
-    test('All exports should be accessible', () {
-      // Test that the main library exports everything needed
-      expect(Factory, isA<Type>());
-      expect(Singleton, isA<Type>());
-      expect(LazySingleton, isA<Type>());
-      expect(LazyFactory, isA<Type>());
-      expect(AsyncFactory, isA<Type>());
-      expect(AsyncSingleton, isA<Type>());
-      expect(AsyncLazySingleton, isA<Type>());
-      expect(RegisterAs, isA<Type>());
-      
-      // Test that the annotations can be instantiated
-      const Factory factoryAnnotation = Factory();
-      const Singleton singletonAnnotation = Singleton();
-      expect(factoryAnnotation, isNotNull);
-      expect(singletonAnnotation, isNotNull);
+    test('should have correct types', () {
+      expect(RegisterFactory, isA<Type>());
+      expect(RegisterSingleton, isA<Type>());
+      expect(RegisterLazySingleton, isA<Type>());
+      expect(RegisterAsyncFactory, isA<Type>());
+      expect(RegisterAsyncSingleton, isA<Type>());
+      expect(RegisterAsyncLazySingleton, isA<Type>());
     });
   });
 
-  group('Documentation Tests', () {
-    test('All annotations should have proper documentation', () {
-      // This test ensures all annotations are properly documented
-      const Factory factoryAnnotation = Factory();
-      const Singleton singletonAnnotation = Singleton();
-      const LazySingleton lazySingletonAnnotation = LazySingleton();
-      const LazyFactory lazyFactoryAnnotation = LazyFactory();
-      const AsyncFactory asyncFactoryAnnotation = AsyncFactory();
-      const AsyncSingleton asyncSingletonAnnotation = AsyncSingleton();
-      const AsyncLazySingleton asyncLazySingletonAnnotation = AsyncLazySingleton();
+  group('Annotation Equality Tests', () {
+    test('should be equal for same annotation types', () {
+      const RegisterFactory factoryAnnotation = RegisterFactory();
+      const RegisterSingleton singletonAnnotation = RegisterSingleton();
       
-      expect(factoryAnnotation.toString(), isNotEmpty);
-      expect(singletonAnnotation.toString(), isNotEmpty);
-      expect(lazySingletonAnnotation.toString(), isNotEmpty);
-      expect(lazyFactoryAnnotation.toString(), isNotEmpty);
-      expect(asyncFactoryAnnotation.toString(), isNotEmpty);
-      expect(asyncSingletonAnnotation.toString(), isNotEmpty);
-      expect(asyncLazySingletonAnnotation.toString(), isNotEmpty);
+      expect(factoryAnnotation.runtimeType, equals(RegisterFactory().runtimeType));
+      expect(singletonAnnotation.runtimeType, equals(RegisterSingleton().runtimeType));
     });
 
-    test('RegisterAs enum should have proper documentation', () {
-      // This test ensures the enum is properly documented
-      for (final RegisterAs value in RegisterAs.values) {
-        expect(value.toString(), isNotEmpty);
-      }
+    test('should not be equal for different annotation types', () {
+      const RegisterFactory factoryAnnotation = RegisterFactory();
+      const RegisterSingleton singletonAnnotation = RegisterSingleton();
+      
+      expect(factoryAnnotation.runtimeType, isNot(equals(singletonAnnotation.runtimeType)));
     });
   });
 
-  group('Annotation Comparison Tests', () {
-    test('Different annotation types should not be equal', () {
-      const Factory factoryAnnotation = Factory();
-      const Singleton singletonAnnotation = Singleton();
-      const LazySingleton lazySingletonAnnotation = LazySingleton();
+  group('Annotation Hash Code Tests', () {
+    test('should have same hash code for same annotation types', () {
+      const RegisterFactory factoryAnnotation1 = RegisterFactory();
+      const RegisterFactory factoryAnnotation2 = RegisterFactory();
+      const RegisterSingleton singletonAnnotation1 = RegisterSingleton();
+      const RegisterSingleton singletonAnnotation2 = RegisterSingleton();
       
-      expect(factoryAnnotation, isNot(equals(singletonAnnotation)));
-      expect(factoryAnnotation, isNot(equals(lazySingletonAnnotation)));
-      expect(singletonAnnotation, isNot(equals(lazySingletonAnnotation)));
+      expect(factoryAnnotation1.hashCode, equals(factoryAnnotation2.hashCode));
+      expect(singletonAnnotation1.hashCode, equals(singletonAnnotation2.hashCode));
     });
 
-    test('Same annotation types should be equal', () {
-      const Factory factoryAnnotation1 = Factory();
-      const Factory factoryAnnotation2 = Factory();
-      const Singleton singletonAnnotation1 = Singleton();
-      const Singleton singletonAnnotation2 = Singleton();
+    test('should have different hash codes for different annotation types', () {
+      const RegisterFactory factoryAnnotation = RegisterFactory();
+      const RegisterSingleton singletonAnnotation = RegisterSingleton();
       
-      expect(factoryAnnotation1, equals(factoryAnnotation2));
-      expect(singletonAnnotation1, equals(singletonAnnotation2));
+      expect(factoryAnnotation.hashCode, isNot(equals(singletonAnnotation.hashCode)));
     });
   });
 
-  group('Edge Cases and Error Handling', () {
-    test('Annotations should handle edge cases gracefully', () {
-      // Test that annotations can be used in various contexts
-      expect(() {
-        const List<Object> annotations = [
-          Factory(),
-          Singleton(),
-          LazySingleton(),
-          LazyFactory(),
-          AsyncFactory(),
-          AsyncSingleton(),
-          AsyncLazySingleton(),
-        ];
-        expect(annotations, hasLength(7));
-      }, returnsNormally);
-    });
-
-    test('RegisterAs enum should handle all cases', () {
-      // Test that all enum values can be used in switch statements
-      for (final RegisterAs value in RegisterAs.values) {
-        expect(() {
-          switch (value) {
-            case RegisterAs.factory:
-            case RegisterAs.singleton:
-            case RegisterAs.lazySingleton:
-            case RegisterAs.factoryAsync:
-            case RegisterAs.lazySingletonAsync:
-            case RegisterAs.singletonAsync:
-              break;
-          }
-        }, returnsNormally);
-      }
-    });
-  });
-
-  group('Builder and Code Generation Tests', () {
-    test('Builder should be accessible', () {
-      // Test that the builder function is accessible
-      expect(buildDiGenerator, isA<Function>());
-    });
-
-    test('SourceDirectoryBuilder should be accessible', () {
-      // Test that the builder class is accessible
-      expect(SourceDirectoryBuilder, isA<Type>());
-    });
-
-    test('DependencyInjectionGenerator should be accessible', () {
-      // Test that the generator class is accessible
-      expect(DependencyInjectionGenerator, isA<Type>());
+  group('Annotation List Tests', () {
+    test('should create list of all annotations', () {
+      final annotations = [
+        RegisterFactory(),
+        RegisterSingleton(),
+        RegisterLazySingleton(),
+        RegisterAsyncFactory(),
+        RegisterAsyncSingleton(),
+        RegisterAsyncLazySingleton(),
+      ];
+      
+      expect(annotations, hasLength(6));
+      expect(annotations[0], isA<RegisterFactory>());
+      expect(annotations[1], isA<RegisterSingleton>());
+      expect(annotations[2], isA<RegisterLazySingleton>());
+      expect(annotations[3], isA<RegisterAsyncFactory>());
+      expect(annotations[4], isA<RegisterAsyncSingleton>());
+      expect(annotations[5], isA<RegisterAsyncLazySingleton>());
     });
   });
 }

@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.0
+
+### 🔄 **Annotation Name Refactoring**
+- **Renamed all annotations** to avoid conflicts with other packages
+- **New unique annotation names** that clearly indicate DI registration
+- **Backward compatibility**: This is a breaking change requiring annotation updates
+
+### 🏷️ **New Annotation Names**
+- `@Factory()` → `@RegisterFactory()`
+- `@Singleton()` → `@RegisterSingleton()`
+- `@LazySingleton()` → `@RegisterLazySingleton()`
+- `@LazyFactory()` → Removed (was alias for LazySingleton)
+- `@AsyncFactory()` → `@RegisterAsyncFactory()`
+- `@AsyncSingleton()` → `@RegisterAsyncSingleton()`
+- `@AsyncLazySingleton()` → `@RegisterAsyncLazySingleton()`
+
+### 🔧 **Updated Components**
+- Updated all annotation classes with new names
+- Modified builder logic to handle new annotation names
+- Updated documentation and examples throughout
+- Refreshed README with new annotation usage
+
+### 📚 **Documentation**
+- Updated all code examples to use new annotation names
+- Refreshed README with current annotation system
+- Updated main library documentation
+
+### ⚠️ **Migration Required**
+Users need to update their annotations:
+```dart
+// Old
+@Singleton()
+class MyService {}
+
+// New
+@RegisterSingleton()
+class MyService {}
+```
+
 ## 1.2.0
 
 ### 🎯 **Perfect Score Achievement**

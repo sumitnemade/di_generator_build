@@ -159,7 +159,8 @@ $className $methodName() {
 
     // Use the first constructor (usually the main one)
     final ConstructorElement constructor = constructors.first;
-    final List<FormalParameterElement> parameters = constructor.formalParameters;
+    final List<FormalParameterElement> parameters =
+        constructor.formalParameters;
 
     if (parameters.isEmpty) {
       return _ConstructorInfo('', '');
@@ -195,9 +196,10 @@ $className $methodName() {
         // For primitive types, handle them in constructor call
         if (isRequiredParam) {
           // Remove underscore from parameter name for named parameters
-          final String paramName = param.name != null && param.name!.startsWith('_') 
-              ? param.name!.substring(1) 
-              : param.name ?? 'param';
+          final String paramName =
+              param.name != null && param.name!.startsWith('_')
+                  ? param.name!.substring(1)
+                  : param.name ?? 'param';
           // For required parameters, provide a default value in the constructor call
           final String defaultValue =
               _getDefaultValueForRequiredParam(paramType, paramName);
@@ -211,9 +213,10 @@ $className $methodName() {
           // For optional parameters, use their default values in constructor call
           if (param.defaultValueCode != null) {
             // Remove underscore from parameter name for named parameters
-            final String paramName = param.name != null && param.name!.startsWith('_')
-                ? param.name!.substring(1)
-                : param.name ?? 'param';
+            final String paramName =
+                param.name != null && param.name!.startsWith('_')
+                    ? param.name!.substring(1)
+                    : param.name ?? 'param';
             // Use the default value from the constructor
             // Check if this is a positional parameter
             if (!isNamedParam) {
@@ -223,11 +226,13 @@ $className $methodName() {
             }
           } else {
             // Fallback default value for optional parameters without explicit defaults
-            final String defaultValue = _getDefaultValueForOptionalParam(paramType, param.name ?? 'param');
+            final String defaultValue = _getDefaultValueForOptionalParam(
+                paramType, param.name ?? 'param');
             // Remove underscore from parameter name for named parameters
-            final String paramName = param.name != null && param.name!.startsWith('_')
-                ? param.name!.substring(1)
-                : param.name ?? 'param';
+            final String paramName =
+                param.name != null && param.name!.startsWith('_')
+                    ? param.name!.substring(1)
+                    : param.name ?? 'param';
 
             // Check if this is a positional parameter
             if (!isNamedParam) {
@@ -593,7 +598,8 @@ class SourceDirectoryBuilder extends Builder {
             .toList();
 
         for (final Element element in elements) {
-          for (final ElementAnnotation metadata in element.metadata.annotations) {
+          for (final ElementAnnotation metadata
+              in element.metadata.annotations) {
             final Element? annotation = metadata.element;
             if (annotation != null) {
               final String key = '${element.name}_${annotation.name}';

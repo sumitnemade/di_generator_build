@@ -80,7 +80,7 @@ Add to your `pubspec.yaml`:
 ```yaml
 dependencies:
   get_it: ^8.2.0
-  di_generator_build: ^1.6.1
+  di_generator_build: ^1.6.2
 
 dev_dependencies:
   build_runner: ^2.7.0

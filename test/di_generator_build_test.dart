@@ -332,7 +332,8 @@ void main() {
     test('should use getOrRegisterFactory optimized method', () {
       final GetIt getIt = GetIt.instance;
 
-      final String value = getIt.getOrRegisterFactory<String>(() => 'optimized_factory');
+      final String value =
+          getIt.getOrRegisterFactory<String>(() => 'optimized_factory');
 
       expect(value, equals('optimized_factory'));
 
@@ -344,7 +345,8 @@ void main() {
     test('should use getOrRegisterLazySingleton optimized method', () {
       final GetIt getIt = GetIt.instance;
 
-      final String value = getIt.getOrRegisterLazySingleton<String>(() => 'optimized_lazy');
+      final String value =
+          getIt.getOrRegisterLazySingleton<String>(() => 'optimized_lazy');
 
       expect(value, equals('optimized_lazy'));
 
@@ -357,7 +359,8 @@ void main() {
     test('should use getOrRegisterSingleton optimized method', () {
       final GetIt getIt = GetIt.instance;
 
-      final String value = getIt.getOrRegisterSingleton<String>(() => 'optimized_singleton');
+      final String value =
+          getIt.getOrRegisterSingleton<String>(() => 'optimized_singleton');
 
       expect(value, equals('optimized_singleton'));
 
@@ -370,7 +373,8 @@ void main() {
     test('should use getOrRegisterFactoryAsync optimized method', () async {
       final GetIt getIt = GetIt.instance;
 
-      final String value = await getIt.getOrRegisterFactoryAsync<String>(() async => 'optimized_async_factory');
+      final String value = await getIt.getOrRegisterFactoryAsync<String>(
+          () async => 'optimized_async_factory');
 
       expect(value, equals('optimized_async_factory'));
 
@@ -379,10 +383,12 @@ void main() {
       expect(value2, equals('optimized_async_factory'));
     });
 
-    test('should use getOrRegisterLazySingletonAsync optimized method', () async {
+    test('should use getOrRegisterLazySingletonAsync optimized method',
+        () async {
       final GetIt getIt = GetIt.instance;
 
-      final String value = await getIt.getOrRegisterLazySingletonAsync<String>(() async => 'optimized_async_lazy');
+      final String value = await getIt.getOrRegisterLazySingletonAsync<String>(
+          () async => 'optimized_async_lazy');
 
       expect(value, equals('optimized_async_lazy'));
 
@@ -395,7 +401,8 @@ void main() {
     test('should use getOrRegisterSingletonAsync optimized method', () async {
       final GetIt getIt = GetIt.instance;
 
-      final String value = await getIt.getOrRegisterSingletonAsync<String>(() async => 'optimized_async_singleton');
+      final String value = await getIt.getOrRegisterSingletonAsync<String>(
+          () async => 'optimized_async_singleton');
 
       expect(value, equals('optimized_async_singleton'));
 
@@ -415,7 +422,9 @@ void main() {
       GetIt.instance.reset();
     });
 
-    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegister', () {
+    test(
+        'should throw UnimplementedError for unsupported RegisterAs in getOrRegister',
+        () {
       final GetIt getIt = GetIt.instance;
 
       expect(
@@ -427,7 +436,9 @@ void main() {
       );
     });
 
-    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync', () {
+    test(
+        'should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync',
+        () {
       final GetIt getIt = GetIt.instance;
 
       expect(
@@ -439,7 +450,9 @@ void main() {
       );
     });
 
-    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - singleton', () {
+    test(
+        'should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - singleton',
+        () {
       final GetIt getIt = GetIt.instance;
 
       expect(
@@ -451,13 +464,16 @@ void main() {
       );
     });
 
-    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - lazySingleton', () {
+    test(
+        'should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - lazySingleton',
+        () {
       final GetIt getIt = GetIt.instance;
 
       expect(
         () => getIt.getOrRegisterAsync<String>(
           () async => 'test',
-          RegisterAs.lazySingleton, // This is not supported in getOrRegisterAsync
+          RegisterAs
+              .lazySingleton, // This is not supported in getOrRegisterAsync
         ),
         throwsA(isA<UnimplementedError>()),
       );
@@ -488,7 +504,8 @@ void main() {
       expect(value, equals('first_value'));
     });
 
-    test('should handle already registered dependencies in getOrRegisterAsync', () async {
+    test('should handle already registered dependencies in getOrRegisterAsync',
+        () async {
       final GetIt getIt = GetIt.instance;
 
       // Register first
@@ -507,7 +524,8 @@ void main() {
       final GetIt getIt = GetIt.instance;
 
       // Define test class outside the test
-      final Map<String, String> instance = getIt.getOrRegister<Map<String, String>>(
+      final Map<String, String> instance =
+          getIt.getOrRegister<Map<String, String>>(
         () => <String, String>{'value': 'complex_object'},
         RegisterAs.singleton,
       );
@@ -519,7 +537,8 @@ void main() {
     test('should handle async complex object types', () async {
       final GetIt getIt = GetIt.instance;
 
-      final Map<String, String> instance = await getIt.getOrRegisterAsync<Map<String, String>>(
+      final Map<String, String> instance =
+          await getIt.getOrRegisterAsync<Map<String, String>>(
         () async => <String, String>{'value': 'async_complex_object'},
         RegisterAs.singletonAsync,
       );

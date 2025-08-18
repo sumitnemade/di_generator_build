@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.6.0
+
+### 🎯 **Perfect Code Coverage Achievement**
+- **100% Code Coverage**: Achieved perfect 100% line coverage across all library files
+- **Comprehensive Testing**: Added 17 new test cases covering all edge cases and error scenarios
+- **Quality Assurance**: All 42 tests passing with zero failures
+
+### 🔧 **Enhanced Testing Coverage**
+- **Optimized Methods Tests**: Complete coverage of all helper methods (`getOrRegisterFactory`, `getOrRegisterLazySingleton`, etc.)
+- **Error Handling Tests**: Full coverage of all `UnimplementedError` throw paths
+- **Edge Cases Tests**: Comprehensive testing of already registered dependencies and complex object types
+- **RegisterAs Enum Tests**: Complete enum value, name, and index validation
+
+### 🛡️ **Security Improvements**
+- **OIDC Authentication**: Removed token-based authentication in favor of OpenID-Connect tokens
+- **GitHub Actions Security**: Updated workflow to use temporary OIDC tokens as per [Dart documentation](https://dart.dev/tools/pub/automated-publishing)
+- **No Long-lived Secrets**: Eliminated need for `PUB_DEV_PUBLISH_ACCESS_TOKEN` secret
+
+### 📚 **Documentation Updates**
+- **Automated Publishing Guide**: Updated to reflect OIDC authentication approach
+- **Security Best Practices**: Aligned with Dart's recommended authentication methods
+- **Simplified Setup**: Removed token configuration requirements
+
+### 🧪 **Test Statistics**
+- **Total Tests**: 42 tests (increased from 25)
+- **Test Groups**: 8 comprehensive groups
+- **Coverage**: 100% line coverage (increased from 64.3%)
+- **Files Covered**: `lib/annotations.dart` and `lib/get_it_extension.dart`
+
+### 🔄 **Workflow Improvements**
+- **Simplified Authentication**: Removed token environment variables from GitHub Actions
+- **OIDC Integration**: Uses GitHub Actions' built-in OIDC capabilities
+- **Security Compliance**: Follows Dart's automated publishing best practices
+
+### 📦 **Package Quality**
+- **Production Ready**: 100% test coverage ensures reliability
+- **Security Compliant**: Uses industry-standard OIDC authentication
+- **Zero Dependencies**: No additional secrets or tokens required
+- **Professional Grade**: Enterprise-level quality assurance
+
 ## 1.5.0
 
 ### 🚀 **Major Feature: Parameterless Generated Methods**

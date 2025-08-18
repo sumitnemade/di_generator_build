@@ -319,4 +319,243 @@ void main() {
       expect(annotations[5], isA<RegisterAsyncLazySingleton>());
     });
   });
+
+  group('GetIt Extension Optimized Methods Tests', () {
+    setUp(() {
+      GetIt.instance.reset();
+    });
+
+    tearDown(() {
+      GetIt.instance.reset();
+    });
+
+    test('should use getOrRegisterFactory optimized method', () {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = getIt.getOrRegisterFactory<String>(() => 'optimized_factory');
+
+      expect(value, equals('optimized_factory'));
+
+      // Should be registered now
+      final String value2 = getIt.get<String>();
+      expect(value2, equals('optimized_factory'));
+    });
+
+    test('should use getOrRegisterLazySingleton optimized method', () {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = getIt.getOrRegisterLazySingleton<String>(() => 'optimized_lazy');
+
+      expect(value, equals('optimized_lazy'));
+
+      // Should be registered now
+      final String value2 = getIt.get<String>();
+      expect(value2, equals('optimized_lazy'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should use getOrRegisterSingleton optimized method', () {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = getIt.getOrRegisterSingleton<String>(() => 'optimized_singleton');
+
+      expect(value, equals('optimized_singleton'));
+
+      // Should be registered now
+      final String value2 = getIt.get<String>();
+      expect(value2, equals('optimized_singleton'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should use getOrRegisterFactoryAsync optimized method', () async {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = await getIt.getOrRegisterFactoryAsync<String>(() async => 'optimized_async_factory');
+
+      expect(value, equals('optimized_async_factory'));
+
+      // Should be registered now
+      final String value2 = await getIt.getAsync<String>();
+      expect(value2, equals('optimized_async_factory'));
+    });
+
+    test('should use getOrRegisterLazySingletonAsync optimized method', () async {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = await getIt.getOrRegisterLazySingletonAsync<String>(() async => 'optimized_async_lazy');
+
+      expect(value, equals('optimized_async_lazy'));
+
+      // Should be registered now
+      final String value2 = await getIt.getAsync<String>();
+      expect(value2, equals('optimized_async_lazy'));
+      expect(identical(value, value2), isTrue);
+    });
+
+    test('should use getOrRegisterSingletonAsync optimized method', () async {
+      final GetIt getIt = GetIt.instance;
+
+      final String value = await getIt.getOrRegisterSingletonAsync<String>(() async => 'optimized_async_singleton');
+
+      expect(value, equals('optimized_async_singleton'));
+
+      // Should be registered now and retrievable synchronously
+      final String value2 = getIt.get<String>();
+      expect(value2, equals('optimized_async_singleton'));
+      expect(identical(value, value2), isTrue);
+    });
+  });
+
+  group('GetIt Extension Error Handling Tests', () {
+    setUp(() {
+      GetIt.instance.reset();
+    });
+
+    tearDown(() {
+      GetIt.instance.reset();
+    });
+
+    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegister', () {
+      final GetIt getIt = GetIt.instance;
+
+      expect(
+        () => getIt.getOrRegister<String>(
+          () => 'test',
+          RegisterAs.factoryAsync, // This is not supported in getOrRegister
+        ),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+
+    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync', () {
+      final GetIt getIt = GetIt.instance;
+
+      expect(
+        () => getIt.getOrRegisterAsync<String>(
+          () async => 'test',
+          RegisterAs.factory, // This is not supported in getOrRegisterAsync
+        ),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+
+    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - singleton', () {
+      final GetIt getIt = GetIt.instance;
+
+      expect(
+        () => getIt.getOrRegisterAsync<String>(
+          () async => 'test',
+          RegisterAs.singleton, // This is not supported in getOrRegisterAsync
+        ),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+
+    test('should throw UnimplementedError for unsupported RegisterAs in getOrRegisterAsync - lazySingleton', () {
+      final GetIt getIt = GetIt.instance;
+
+      expect(
+        () => getIt.getOrRegisterAsync<String>(
+          () async => 'test',
+          RegisterAs.lazySingleton, // This is not supported in getOrRegisterAsync
+        ),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+  });
+
+  group('GetIt Extension Edge Cases Tests', () {
+    setUp(() {
+      GetIt.instance.reset();
+    });
+
+    tearDown(() {
+      GetIt.instance.reset();
+    });
+
+    test('should handle already registered dependencies in getOrRegister', () {
+      final GetIt getIt = GetIt.instance;
+
+      // Register first
+      getIt.registerSingleton<String>('first_value');
+
+      // Try to getOrRegister - should return existing value
+      final String value = getIt.getOrRegister<String>(
+        () => 'second_value',
+        RegisterAs.singleton,
+      );
+
+      expect(value, equals('first_value'));
+    });
+
+    test('should handle already registered dependencies in getOrRegisterAsync', () async {
+      final GetIt getIt = GetIt.instance;
+
+      // Register first
+      getIt.registerSingleton<String>('first_async_value');
+
+      // Try to getOrRegisterAsync - should return existing value
+      final String value = await getIt.getOrRegisterAsync<String>(
+        () async => 'second_async_value',
+        RegisterAs.singletonAsync,
+      );
+
+      expect(value, equals('first_async_value'));
+    });
+
+    test('should handle complex object types', () {
+      final GetIt getIt = GetIt.instance;
+
+      // Define test class outside the test
+      final instance = getIt.getOrRegister<Map<String, String>>(
+        () => {'value': 'complex_object'},
+        RegisterAs.singleton,
+      );
+
+      expect(instance['value'], equals('complex_object'));
+      expect(instance, isA<Map<String, String>>());
+    });
+
+    test('should handle async complex object types', () async {
+      final GetIt getIt = GetIt.instance;
+
+      final instance = await getIt.getOrRegisterAsync<Map<String, String>>(
+        () async => {'value': 'async_complex_object'},
+        RegisterAs.singletonAsync,
+      );
+
+      expect(instance['value'], equals('async_complex_object'));
+      expect(instance, isA<Map<String, String>>());
+    });
+  });
+
+  group('RegisterAs Enum Tests', () {
+    test('should have all expected enum values', () {
+      expect(RegisterAs.values, hasLength(6));
+      expect(RegisterAs.values, contains(RegisterAs.singleton));
+      expect(RegisterAs.values, contains(RegisterAs.factory));
+      expect(RegisterAs.values, contains(RegisterAs.lazySingleton));
+      expect(RegisterAs.values, contains(RegisterAs.factoryAsync));
+      expect(RegisterAs.values, contains(RegisterAs.lazySingletonAsync));
+      expect(RegisterAs.values, contains(RegisterAs.singletonAsync));
+    });
+
+    test('should have correct enum value names', () {
+      expect(RegisterAs.singleton.name, equals('singleton'));
+      expect(RegisterAs.factory.name, equals('factory'));
+      expect(RegisterAs.lazySingleton.name, equals('lazySingleton'));
+      expect(RegisterAs.factoryAsync.name, equals('factoryAsync'));
+      expect(RegisterAs.lazySingletonAsync.name, equals('lazySingletonAsync'));
+      expect(RegisterAs.singletonAsync.name, equals('singletonAsync'));
+    });
+
+    test('should have correct enum value indices', () {
+      expect(RegisterAs.singleton.index, equals(0));
+      expect(RegisterAs.factory.index, equals(1));
+      expect(RegisterAs.lazySingleton.index, equals(2));
+      expect(RegisterAs.factoryAsync.index, equals(3));
+      expect(RegisterAs.lazySingletonAsync.index, equals(4));
+      expect(RegisterAs.singletonAsync.index, equals(5));
+    });
+  });
 }

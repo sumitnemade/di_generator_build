@@ -4,9 +4,9 @@
 [![Dart Version](https://img.shields.io/badge/dart-3.2.3+-blue.svg)](https://dart.dev/)
 [![Flutter Version](https://img.shields.io/badge/flutter-3.16.0+-blue.svg)](https://flutter.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/your-username/di_generator_build)
-[![Code Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](https://github.com/your-username/di_generator_build)
-[![Issues](https://img.shields.io/badge/issues-welcome-orange.svg)](https://github.com/your-username/di_generator_build/issues)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/sumitnemade/di_generator_build)
+[![Code Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](https://github.com/sumitnemade/di_generator_build)
+[![Issues](https://img.shields.io/badge/issues-welcome-orange.svg)](https://github.com/sumitnemade/di_generator_build/issues)
 
 [![Dependency Injection](https://img.shields.io/badge/dependency--injection-automatic-blue.svg)](https://pub.dev/packages/di_generator_build)
 [![Code Generation](https://img.shields.io/badge/code--generation-automatic-green.svg)](https://pub.dev/packages/di_generator_build)

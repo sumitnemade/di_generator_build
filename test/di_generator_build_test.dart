@@ -263,8 +263,8 @@ void main() {
       const RegisterFactory factoryAnnotation = RegisterFactory();
       const RegisterSingleton singletonAnnotation = RegisterSingleton();
 
-      expect(
-          factoryAnnotation.runtimeType, equals(const RegisterFactory().runtimeType));
+      expect(factoryAnnotation.runtimeType,
+          equals(const RegisterFactory().runtimeType));
       expect(singletonAnnotation.runtimeType,
           equals(const RegisterSingleton().runtimeType));
     });

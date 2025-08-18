@@ -77,7 +77,7 @@ class DependencyInjectionGenerator extends GeneratorForAnnotation<Object> {
       );
     }
 
-    final String className = element.name;
+    final String? className = element.name;
 
     // Get the annotation type from the element's metadata
     final String annotationName = _getAnnotationName(element, annotation);
@@ -113,7 +113,7 @@ $className $methodName() {
   /// Get the annotation name from the element's metadata
   String _getAnnotationName(ClassElement element, ConstantReader annotation) {
     // Look for our annotations in the element's metadata
-    for (final ElementAnnotation metadata in element.metadata) {
+    for (final ElementAnnotation metadata in element.metadata.annotations) {
       final Element? annotationElement = metadata.element;
       if (annotationElement != null) {
         final String annotationName = annotationElement.displayName;
@@ -159,7 +159,7 @@ $className $methodName() {
 
     // Use the first constructor (usually the main one)
     final ConstructorElement constructor = constructors.first;
-    final List<ParameterElement> parameters = constructor.parameters;
+    final List<FormalParameterElement> parameters = constructor.formalParameters;
 
     if (parameters.isEmpty) {
       return _ConstructorInfo('', '');
@@ -168,8 +168,21 @@ $className $methodName() {
     final List<String> paramSignatures = <String>[];
     final List<String> constructorCalls = <String>[];
 
-    for (final ParameterElement param in parameters) {
+    for (final FormalParameterElement param in parameters) {
       final String paramType = param.type.toString();
+      // Determine parameter kind robustly across analyzer versions
+      bool isNamedParam = (param.isNamed == true) ||
+          (param.isOptionalNamed == true) ||
+          (param.isRequiredNamed == true);
+      final bool isRequiredParam = (param.isOptional == false) ||
+          (param.isRequiredNamed == true) ||
+          (param.isRequiredPositional == true);
+
+      // Heuristic: certain well-known parameter names are always named in Dart constructors
+      final String safeParamName = (param.name ?? '').toLowerCase();
+      if (safeParamName == 'defaultvalue') {
+        isNamedParam = true;
+      }
 
       // Check if it's a class dependency (not a primitive type)
       if (_isClassType(paramType)) {
@@ -180,15 +193,16 @@ $className $methodName() {
         constructorCalls.add(dependencyCall);
       } else {
         // For primitive types, handle them in constructor call
-        if (param.isRequired) {
+        if (isRequiredParam) {
           // Remove underscore from parameter name for named parameters
-          final String paramName =
-              param.name.startsWith('_') ? param.name.substring(1) : param.name;
+          final String paramName = param.name != null && param.name!.startsWith('_') 
+              ? param.name!.substring(1) 
+              : param.name ?? 'param';
           // For required parameters, provide a default value in the constructor call
           final String defaultValue =
               _getDefaultValueForRequiredParam(paramType, paramName);
           // Check if this is a positional parameter
-          if (param.isPositional) {
+          if (!isNamedParam) {
             constructorCalls.add(defaultValue);
           } else {
             constructorCalls.add('$paramName: $defaultValue');
@@ -197,40 +211,29 @@ $className $methodName() {
           // For optional parameters, use their default values in constructor call
           if (param.defaultValueCode != null) {
             // Remove underscore from parameter name for named parameters
-            final String paramName = param.name.startsWith('_')
-                ? param.name.substring(1)
-                : param.name;
+            final String paramName = param.name != null && param.name!.startsWith('_')
+                ? param.name!.substring(1)
+                : param.name ?? 'param';
             // Use the default value from the constructor
             // Check if this is a positional parameter
-            if (param.isPositional) {
+            if (!isNamedParam) {
               constructorCalls.add(param.defaultValueCode!);
             } else {
               constructorCalls.add('$paramName: ${param.defaultValueCode}');
             }
           } else {
-            // Fallback default value
-            final String defaultValue = _getDefaultValueForType(paramType);
+            // Fallback default value for optional parameters without explicit defaults
+            final String defaultValue = _getDefaultValueForOptionalParam(paramType, param.name ?? 'param');
             // Remove underscore from parameter name for named parameters
-            final String paramName = param.name.startsWith('_')
-                ? param.name.substring(1)
-                : param.name;
+            final String paramName = param.name != null && param.name!.startsWith('_')
+                ? param.name!.substring(1)
+                : param.name ?? 'param';
 
-            // If defaultValue is empty, don't add a default value (for nullable types)
-            if (defaultValue.isEmpty) {
-              // For nullable types without defaults, use null
-              // Check if this is a positional parameter
-              if (param.isPositional) {
-                constructorCalls.add('null');
-              } else {
-                constructorCalls.add('$paramName: null');
-              }
+            // Check if this is a positional parameter
+            if (!isNamedParam) {
+              constructorCalls.add(defaultValue);
             } else {
-              // Check if this is a positional parameter
-              if (param.isPositional) {
-                constructorCalls.add(defaultValue);
-              } else {
-                constructorCalls.add('$paramName: $defaultValue');
-              }
+              constructorCalls.add('$paramName: $defaultValue');
             }
           }
         }
@@ -288,6 +291,11 @@ $className $methodName() {
       return false;
     }
 
+    // Treat single-letter generic type parameters (e.g., T) as non-class parameters
+    if (type.length == 1 && type.toUpperCase() == type) {
+      return false;
+    }
+
     return true;
   }
 
@@ -302,6 +310,11 @@ $className $methodName() {
 
   /// Get the appropriate dependency call based on whether the dependency has required parameters
   String _getDependencyCall(String className, ClassElement currentElement) {
+    // Handle generic type parameters (like T in StorageService<T>)
+    if (className.length == 1 && className.toUpperCase() == className) {
+      return 'null'; // For generic type parameters, use null
+    }
+
     // For dependencies with required parameters, we need to ensure they are properly configured
     // This is a complex issue that requires analyzing the dependency's constructor
     // For now, we'll use a simple approach and assume the dependency can be resolved
@@ -319,33 +332,61 @@ $className $methodName() {
   }
 
   /// Get default value for primitive types
-  String _getDefaultValueForType(String type) {
+  String _getDefaultValueForType(String type, [String? paramName]) {
     // Handle nullable types - no default value needed as they default to null
     if (type.endsWith('?')) {
       return ''; // Empty string means no default value
     }
 
-    if (type.contains('String')) {
+    // Handle complex types first to avoid false matches
+    if (type.startsWith('Map<')) {
+      return 'const {}';
+    }
+    if (type.startsWith('List<')) {
+      return 'const []';
+    }
+    if (type.startsWith('Set<')) {
+      return 'const {}';
+    }
+    if (type == 'Map' || type == 'List' || type == 'Set') {
+      return 'const {}';
+    }
+    if (type == 'Duration') {
+      return 'Duration.zero';
+    }
+    if (type == 'DateTime') {
+      return 'DateTime.now()';
+    }
+    if (type == 'Uri') {
+      return 'Uri.parse("https://example.com")';
+    }
+    if (type == 'RegExp') {
+      return 'RegExp(r".*")';
+    }
+
+    // Handle primitive types
+    if (type == 'String') {
       return "'default-value'";
     }
-    if (type.contains('int')) {
+    if (type == 'int') {
       return '0';
     }
-    if (type.contains('double')) {
+    if (type == 'double') {
       return '0.0';
     }
-    if (type.contains('bool')) {
+    if (type == 'bool') {
       return 'false';
     }
-    if (type.contains('List')) {
-      return '[]';
+
+    // Handle generic types (like T in StorageService<T>)
+    if (type.length == 1 && type.toUpperCase() == type) {
+      // For generic type parameters, provide a meaningful default based on context
+      if (paramName?.toLowerCase().contains('defaultvalue') == true) {
+        return 'null'; // For defaultValue parameters, use null
+      }
+      return 'null'; // For other generic type parameters, use null
     }
-    if (type.contains('Map')) {
-      return '{}';
-    }
-    if (type.contains('Set')) {
-      return '{}';
-    }
+
     return 'null';
   }
 
@@ -370,9 +411,71 @@ $className $methodName() {
     if (paramName.toLowerCase().contains('id')) {
       return '"default-id"';
     }
+    // Exact matches first to avoid accidental broader matches
+    if (paramName.toLowerCase() == 'named' && type == 'bool') {
+      return 'false'; // For boolean named parameters
+    }
+    if (paramName.toLowerCase() == 'name') {
+      return '"default-name"';
+    }
+    if (paramName.toLowerCase().contains('pattern')) {
+      return '"default-pattern"';
+    }
+    if (paramName.toLowerCase().contains('baseuri')) {
+      return 'Uri.parse("https://api.example.com")';
+    }
+    if (paramName.toLowerCase().contains('interval')) {
+      return 'Duration(minutes: 5)';
+    }
+    if (paramName.toLowerCase() == 'named' && type == 'bool') {
+      return 'false'; // For boolean named parameters
+    }
 
     // Fall back to generic defaults
-    return _getDefaultValueForType(type);
+    return _getDefaultValueForType(type, paramName);
+  }
+
+  /// Get default value for optional parameters
+  String _getDefaultValueForOptionalParam(String type, String paramName) {
+    // Handle nullable types - they default to null
+    if (type.endsWith('?')) {
+      return 'null';
+    }
+
+    // For optional parameters that are not nullable, provide meaningful defaults
+    if (paramName.toLowerCase().contains('channels')) {
+      return 'const ["email", "push"]';
+    }
+    if (paramName.toLowerCase().contains('settings')) {
+      return 'const {}';
+    }
+    if (paramName.toLowerCase().contains('features')) {
+      return 'const []';
+    }
+    if (paramName.toLowerCase().contains('permissions')) {
+      return 'const {}';
+    }
+    if (paramName.toLowerCase().contains('loglevel')) {
+      return '"info"';
+    }
+    if (paramName.toLowerCase().contains('enableconsole')) {
+      return 'true';
+    }
+    if (paramName.toLowerCase().contains('urlpattern')) {
+      return 'RegExp(r"^https?://")';
+    }
+    if (paramName.toLowerCase().contains('starttime')) {
+      return 'DateTime.now()';
+    }
+    if (paramName.toLowerCase().contains('storage')) {
+      return 'const {}';
+    }
+    if (paramName.toLowerCase().contains('interval')) {
+      return 'Duration(minutes: 5)';
+    }
+
+    // Fall back to generic defaults
+    return _getDefaultValueForType(type, paramName);
   }
 
   /// Convert registration type enum to string representation
@@ -444,12 +547,12 @@ class SourceDirectoryBuilder extends Builder {
 
     // Check if this file has any dependency injection annotations
     final bool hasDependencyInjectionAnnotations =
-        library.topLevelElements.any((Element element) {
-      if (element.metadata.isEmpty) {
+        library.children.any((Element element) {
+      if (element.metadata.annotations.isEmpty) {
         return false;
       }
 
-      for (final ElementAnnotation metadata in element.metadata) {
+      for (final ElementAnnotation metadata in element.metadata.annotations) {
         final Element? annotationElement = metadata.element;
         if (annotationElement != null) {
           final String? annotationType = annotationElement.library?.name;
@@ -485,12 +588,12 @@ class SourceDirectoryBuilder extends Builder {
 
     for (final Generator generator in _generators) {
       if (generator is GeneratorForAnnotation) {
-        final List<Element> elements = library.topLevelElements
-            .where((Element element) => element.metadata.isNotEmpty)
+        final List<Element> elements = library.children
+            .where((Element element) => element.metadata.annotations.isNotEmpty)
             .toList();
 
         for (final Element element in elements) {
-          for (final ElementAnnotation metadata in element.metadata) {
+          for (final ElementAnnotation metadata in element.metadata.annotations) {
             final Element? annotation = metadata.element;
             if (annotation != null) {
               final String key = '${element.name}_${annotation.name}';

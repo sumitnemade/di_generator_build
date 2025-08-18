@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.6.1
+
+### 🔧 **Enhanced Parameter Detection & Type Safety**
+- **Robust Parameter Detection**: Improved detection of required vs optional parameters across analyzer versions
+- **Boolean Parameter Fix**: Fixed `named` boolean parameter default value generation
+- **Generic Type Handling**: Better handling of single-letter generic type parameters (e.g., `T`)
+- **Named Parameter Support**: Enhanced support for required named parameters with proper defaults
+
+### 🎯 **Comprehensive Flutter Integration Testing**
+- **Complete Test Suite**: Created comprehensive Flutter test app with 20 different service scenarios
+- **All DI Patterns Tested**: Factory, Singleton, Lazy Singleton, Async variants, and complex chains
+- **Parameter Type Coverage**: Tested primitive types, collections, nullable types, and complex types
+- **Real-world Validation**: Verified package works correctly in actual Flutter applications
+
+### 🛠️ **Code Generation Improvements**
+- **Default Value Logic**: Enhanced default value generation for complex types (Map, List, Set, Duration, DateTime, Uri, RegExp)
+- **Parameter Name Matching**: Improved exact vs partial parameter name matching for better defaults
+- **Nullable Parameter Handling**: Better handling of optional nullable parameters
+- **Constructor Parameter Detection**: More accurate detection of positional vs named parameters
+
+### 🧪 **Tested Scenarios in Flutter App**
+- ✅ **Basic Services**: AppConfig, HttpClient with primitive parameters
+- ✅ **Dependency Chains**: AnalyticsService, AuthService with complex dependencies
+- ✅ **Async Services**: DatabaseService, CacheService, NotificationService with async initialization
+- ✅ **Complex Types**: ConfigService with Map, List, Set parameters
+- ✅ **Generic Types**: StorageService with generic type parameters
+- ✅ **Mixed Parameters**: MixedParamsService with positional and named parameters
+- ✅ **Nullable Parameters**: LoggerService with optional nullable parameters
+- ✅ **Special Types**: SchedulerService with Duration/DateTime, NetworkService with Uri/RegExp
+
+### 🔄 **API Compatibility**
+- **Backward Compatible**: All existing functionality preserved
+- **Enhanced Defaults**: Better default values for common parameter names
+- **Type Safety**: Improved type checking and validation
+- **Error Prevention**: Better handling of edge cases and potential errors
+
 ## 1.6.0
 
 ### 🎯 **Perfect Code Coverage Achievement**

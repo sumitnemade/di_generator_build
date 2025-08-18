@@ -507,8 +507,8 @@ void main() {
       final GetIt getIt = GetIt.instance;
 
       // Define test class outside the test
-      final instance = getIt.getOrRegister<Map<String, String>>(
-        () => {'value': 'complex_object'},
+      final Map<String, String> instance = getIt.getOrRegister<Map<String, String>>(
+        () => <String, String>{'value': 'complex_object'},
         RegisterAs.singleton,
       );
 
@@ -519,8 +519,8 @@ void main() {
     test('should handle async complex object types', () async {
       final GetIt getIt = GetIt.instance;
 
-      final instance = await getIt.getOrRegisterAsync<Map<String, String>>(
-        () async => {'value': 'async_complex_object'},
+      final Map<String, String> instance = await getIt.getOrRegisterAsync<Map<String, String>>(
+        () async => <String, String>{'value': 'async_complex_object'},
         RegisterAs.singletonAsync,
       );
 

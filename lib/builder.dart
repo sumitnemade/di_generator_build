@@ -381,7 +381,7 @@ $className $methodName() {
     // Handle generic types (like T in StorageService<T>)
     if (type.length == 1 && type.toUpperCase() == type) {
       // For generic type parameters, provide a meaningful default based on context
-      if (paramName?.toLowerCase().contains('defaultvalue') == true) {
+      if (paramName?.toLowerCase().contains('defaultvalue') ?? false) {
         return 'null'; // For defaultValue parameters, use null
       }
       return 'null'; // For other generic type parameters, use null

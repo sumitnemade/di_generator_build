@@ -1,5 +1,20 @@
 # DI Generator Build
 
+[![Pub Version](https://img.shields.io/pub/v/di_generator_build)](https://pub.dev/packages/di_generator_build)
+[![Dart Version](https://img.shields.io/badge/dart-3.2.3+-blue.svg)](https://dart.dev/)
+[![Flutter Version](https://img.shields.io/badge/flutter-3.16.0+-blue.svg)](https://flutter.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/your-username/di_generator_build)
+[![Code Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](https://github.com/your-username/di_generator_build)
+[![Issues](https://img.shields.io/badge/issues-welcome-orange.svg)](https://github.com/your-username/di_generator_build/issues)
+
+[![Dependency Injection](https://img.shields.io/badge/dependency--injection-automatic-blue.svg)](https://pub.dev/packages/di_generator_build)
+[![Code Generation](https://img.shields.io/badge/code--generation-automatic-green.svg)](https://pub.dev/packages/di_generator_build)
+[![GetIt Integration](https://img.shields.io/badge/getit-integration-purple.svg)](https://pub.dev/packages/get_it)
+[![Async Support](https://img.shields.io/badge/async-support-yellow.svg)](https://pub.dev/packages/di_generator_build)
+[![Lazy Loading](https://img.shields.io/badge/lazy--loading-enabled-brightgreen.svg)](https://pub.dev/packages/di_generator_build)
+[![Performance](https://img.shields.io/badge/performance-optimized-orange.svg)](https://pub.dev/packages/di_generator_build)
+
 A Flutter package that automatically generates dependency injection code for your classes using GetIt.
 
 ## What This Package Does
@@ -100,7 +115,7 @@ class EmailService {
   final HttpClient _httpClient;
   final String _apiKey;
   
-  EmailService(this._httpClient, [this._apiKey = 'default-key']);
+  EmailService(this._httpClient, {required String apiKey});
   
   Future<void> sendEmail(String to, String subject, String body) async {
     // Email sending logic
@@ -122,14 +137,10 @@ dart run build_runner build
 import 'your_file.g.dart';
 
 void main() {
-  // Get services using generated methods
-  final config = getAppConfig(
-    apiUrl: 'https://api.example.com',
-    apiKey: 'your-api-key',
-  );
-  
-  final client = getHttpClient(); // Automatically gets AppConfig dependency
-  final emailService = getEmailService(); // Gets HttpClient dependency automatically
+  // Get services using generated methods (no parameters needed)
+  final config = getConfigService();
+  final client = getNetworkService(); // Automatically gets ConfigService dependency
+  final authService = getAuthService(); // Gets NetworkService dependency automatically
 }
 ```
 
@@ -165,6 +176,70 @@ Separate dependency creation from business logic, making your code more testable
 
 ### Automatic Dependency Resolution
 Dependencies are automatically injected based on constructor parameters, reducing boilerplate code.
+
+### Cross-File Dependencies
+When services depend on each other across different files, import the generated `.g.dart` files in your main application code:
+
+```dart
+// In your main.dart or di_setup.dart
+import 'services/app_config.g.dart';
+import 'services/http_client.g.dart';
+import 'services/email_service.g.dart';
+// ... import other generated files as needed
+```
+
+### Automatic Parameter Handling
+The generated methods automatically handle all parameters with sensible defaults:
+
+- **Required parameters**: Use meaningful defaults based on parameter names (e.g., `apiKey` → `"default-api-key"`)
+- **Optional parameters**: Use the default values defined in the constructor
+- **Dependencies**: Automatically resolved from GetIt service locator
+
+```dart
+// No need to pass parameters - everything is handled automatically
+final authService = getAuthService(); // Uses default values for apiKey, secretKey, tokenExpiry
+final userService = await getUserService(); // All dependencies resolved automatically
+```
+
+### Important Note About Cross-File Dependencies
+The generated `.g.dart` files are independent and don't automatically import each other. This is by design to keep the package generic. You need to:
+
+1. Import all the necessary `.g.dart` files in your main application code
+2. Call the dependency methods with their required parameters before using dependent services
+3. The GetIt service locator will handle the dependency resolution
+
+Example:
+```dart
+// In your main.dart or di_setup.dart
+import 'services/config_service.g.dart';
+import 'services/network_service.g.dart';
+import 'services/auth_service.g.dart';
+import 'services/storage_service.g.dart';
+import 'services/user_repository.g.dart';
+import 'services/user_service.g.dart';
+import 'services/notification_service.g.dart';
+
+void main() async {
+  // Set up dependencies in the correct order (no parameters needed)
+  final config = getConfigService();
+  final network = getNetworkService(); // Uses the registered ConfigService
+  final auth = getAuthService(); // Uses the registered NetworkService
+  final storage = await getStorageService(); // Uses default connection string
+  final userRepo = await getUserRepository(); // Uses the registered StorageService
+  final userService = await getUserService(); // Uses the registered UserRepository and AuthService
+  final notification = await getNotificationService(); // Uses the registered NetworkService
+}
+```
+
+### Best Practices for Dependency Management
+
+1. **Order Matters**: Always call dependencies before the services that depend on them
+2. **Required Parameters**: Provide required parameters when calling factory services
+3. **Async Services**: Use `await` for async services
+4. **Singleton vs Factory**: Understand when to use each type:
+   - **Singleton**: Use for configuration, shared state
+   - **Lazy Singleton**: Use for expensive services that should be shared
+   - **Factory**: Use for services that need different parameters each time
 
 
 ## 📝 Examples

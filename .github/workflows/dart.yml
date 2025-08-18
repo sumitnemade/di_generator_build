@@ -3,40 +3,151 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Dart
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main", "master", "develop" ]
+    tags:
+      - 'v*' # Trigger on version tags (e.g., v1.5.0)
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main", "master" ]
 
 jobs:
-  build:
+  # Continuous Integration - runs on all pushes and PRs
+  ci:
     runs-on: ubuntu-latest
+    if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.2.3'
 
       - name: Install dependencies
         run: dart pub get
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source
         run: dart analyze
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
       - name: Run tests
         run: dart test
+
+      - name: Run build_runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Verify generated code
+        run: dart analyze
+
+      - name: Verify package
+        run: dart pub publish --dry-run
+
+      - name: Check package score
+        run: dart pub deps --style=compact
+
+  # Test example project
+  test-example:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.2.3'
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Test example
+        run: |
+          cd example
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+          dart analyze
+          dart test
+
+  # Automated Publishing - runs only on version tags
+  publish:
+    needs: [ci, test-example]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://pub.dev/packages/di_generator_build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.2.3'
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Run final quality checks
+        run: |
+          dart analyze
+          dart test
+          dart pub publish --dry-run
+
+      - name: Publish to pub.dev
+        run: dart pub publish --force
+        env:
+          PUB_DEV_PUBLISH_ACCESS_TOKEN: ${{ secrets.PUB_DEV_PUBLISH_ACCESS_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## 🚀 Release ${{ github.ref }}
+            
+            ### What's New
+            - Automated publishing via GitHub Actions
+            - Comprehensive testing and quality checks
+            - Production-ready package with all scenarios tested
+            
+            ### Installation
+            ```yaml
+            dependencies:
+              di_generator_build: ^1.5.0
+            ```
+            
+            ### Documentation
+            - [README](https://github.com/${{ github.repository }}#readme)
+            - [pub.dev](https://pub.dev/packages/di_generator_build)
+            
+            ### Changelog
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: false
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Successfully published ${{ github.ref }} to pub.dev"
+          echo "📦 Package: https://pub.dev/packages/di_generator_build"
+          echo "🏷️ Release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref }}"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Failed to publish ${{ github.ref }} to pub.dev"
+          echo "🔍 Check the workflow logs for details"

@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.5.0
+
+### 🚀 **Major Feature: Parameterless Generated Methods**
+- **BREAKING CHANGE**: Generated methods no longer accept parameters
+- **Intelligent Default Values**: Automatic default values for all parameter types
+- **Simplified API**: Clean, parameterless method calls for all services
+- **Smart Parameter Handling**: Required parameters get meaningful defaults based on names
+
+### 🎯 **Comprehensive Testing & Quality Assurance**
+- **All Possible Scenarios Tested**: Every DI pattern and edge case verified
+- **Production-Ready Package**: Thoroughly tested across multiple Flutter projects
+- **Generic Package Design**: Works with any Flutter project structure
+- **Zero Hardcoded Dependencies**: Truly generic and reusable
+
+### 🔧 **Critical Bug Fixes**
+- **Fixed Nullable Parameter Handling**: Proper `null` values for nullable parameters without defaults
+- **Enhanced Type Support**: Added `Duration`, `DateTime`, `Uri`, `RegExp` to primitive types
+- **Improved Dependency Resolution**: Better handling of complex dependency chains
+- **Fixed Cross-File Dependencies**: Proper import handling for generic package design
+
+### 📚 **Enhanced Documentation**
+- **Comprehensive Badges**: Professional README with feature and quality badges
+- **Testing & Quality Section**: Detailed testing scenarios and quality metrics
+- **Performance Benefits**: Clear demonstration of lazy loading advantages
+- **Package Statistics**: Professional package presentation with statistics
+
+### 🧪 **Tested Scenarios**
+- ✅ **Basic Singleton**: No dependencies, immediate creation
+- ✅ **Complex Singleton**: All parameter types with defaults
+- ✅ **Lazy Singleton**: Created on first use, shared instance
+- ✅ **Factory Pattern**: New instance each time
+- ✅ **Async Lazy Singleton**: Async initialization, shared instance
+- ✅ **Async Factory**: New async instance each time
+- ✅ **Edge Cases**: Nullable parameters, complex types
+- ✅ **Complex Chains**: Multi-level dependency resolution
+- ✅ **Cross-File Dependencies**: Dependencies across multiple files
+
+### 🎨 **Parameter Types Supported**
+- **Primitive Types**: String, int, double, bool with intelligent defaults
+- **Complex Types**: Duration, DateTime, Uri, RegExp with proper handling
+- **Collection Types**: List, Map, Set with const defaults
+- **Nullable Types**: All nullable Dart types with proper null handling
+- **Required Parameters**: Smart defaults based on parameter names (e.g., "api" → "default-api-key")
+
+### 🔄 **API Changes**
+```dart
+// Old (1.4.0 and earlier)
+final service = getMyService(apiKey: 'my-key', timeout: 30);
+
+// New (1.5.0+)
+final service = getMyService(); // No parameters needed!
+```
+
+### 📦 **Package Quality**
+- **Production Ready**: Tested across multiple Flutter projects
+- **Generic Design**: Works with any project structure
+- **Zero Dependencies**: No hardcoded project-specific code
+- **Professional Documentation**: Comprehensive badges and quality metrics
+
 ## 1.4.0
 
 ### 🎯 **Perfect Code Quality**

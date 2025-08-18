@@ -5,7 +5,7 @@
 [![Flutter Version](https://img.shields.io/badge/flutter-3.16.0+-blue.svg)](https://flutter.dev/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/sumitnemade/di_generator_build)
-[![Code Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)](https://github.com/sumitnemade/di_generator_build)
+[![Code Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/sumitnemade/di_generator_build)
 [![Issues](https://img.shields.io/badge/issues-welcome-orange.svg)](https://github.com/sumitnemade/di_generator_build/issues)
 
 [![Dependency Injection](https://img.shields.io/badge/dependency--injection-automatic-blue.svg)](https://pub.dev/packages/di_generator_build)
@@ -79,11 +79,11 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  get_it: ^7.6.0
-  di_generator_build: ^1.3.0
+  get_it: ^8.2.0
+  di_generator_build: ^1.6.1
 
 dev_dependencies:
-  build_runner: ^2.5.4
+  build_runner: ^2.7.0
 ```
 
 ### 2. Annotate Your Classes
